@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARC Agent FAQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --ink:#0E141B;
+  --ink-2:#2B3642;
+  --slate:#5A6675;
+  --slate-2:#8794A3;
+  --paper:#EEF1F5;
+  --card:#FFFFFF;
+  --line:#DCE2EA;
+  --line-soft:#E8ECF2;
+  --accent:#0C6B66;
+  --accent-soft:#E2F1EF;
+  --accent-ink:#08514D;
+  --amber:#FFD262;
+  --amber-deep:#8A6100;
+  --warn:#B04A21;
+  --warn-soft:#FBEDE6;
+  --shadow:0 1px 2px rgba(14,20,27,.05), 0 8px 24px -12px rgba(14,20,27,.18);
+
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Public Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  --rail:264px;
+  --maxw:1180px;
+  --r:12px;
+}
+[data-theme="dark"]{
+  --ink:#EDF1F6;
+  --ink-2:#C7D0DB;
+  --slate:#95A2B1;
+  --slate-2:#6E7C8C;
+  --paper:#0C1116;
+  --card:#141B23;
+  --line:#232E3A;
+  --line-soft:#1C242D;
+  --accent:#4FD1C5;
+  --accent-soft:#12302E;
+  --accent-ink:#8AE5DB;
+  --amber:#7A5A12;
+  --amber-deep:#FFD262;
+  --warn:#F0A17A;
+  --warn-soft:#2A1810;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box}
+/* class selectors outrank the browser default [hidden] rule, so make it
+   authoritative once here rather than patching each component */
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent-ink);text-decoration-thickness:1px;text-underline-offset:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line-soft);
+}
+.topbar-in{
+  max-width:var(--maxw);margin:0 auto;padding:14px 24px;
+  display:flex;align-items:center;gap:10px;
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{
+  width:30px;height:30px;border-radius:9px;flex:none;
+  background:var(--accent);color:#fff;
+  display:grid;place-items:center;
+  font-family:var(--mono);font-size:13px;font-weight:700;
+}
+[data-theme="dark"] .brand-mark{color:#0C1116}
+.brand-name{
+  font-family:var(--display);font-weight:700;font-size:16px;
+  letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.topbar-spacer{flex:1}
+.iconbtn{
+  height:34px;padding:0 12px;border-radius:9px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.04em;
+  cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+  transition:border-color .15s, color .15s;
+}
+.iconbtn:hover{border-color:var(--slate-2);color:var(--ink)}
+.iconbtn.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{max-width:var(--maxw);margin:0 auto;padding:56px 24px 30px}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+  margin:0 0 14px;
+}
+.hero h1{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(34px,5.4vw,58px);line-height:1.03;letter-spacing:-.032em;
+  margin:0 0 12px;max-width:16ch;
+}
+.hero p.lede{
+  margin:0 0 28px;max-width:56ch;
+  font-size:17px;color:var(--slate);
+}
+
+.searchwrap{position:relative;max-width:720px}
+.searchbox{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border:1.5px solid var(--line);
+  border-radius:14px;padding:0 14px 0 16px;height:60px;
+  box-shadow:var(--shadow);
+  transition:border-color .16s, box-shadow .16s;
+}
+.searchbox:focus-within{
+  border-color:var(--accent);
+  box-shadow:var(--shadow), 0 0 0 4px var(--accent-soft);
+}
+.searchbox > svg{flex:none;color:var(--slate-2)}
+#q{
+  flex:1;min-width:0;border:0;background:transparent;outline:0;
+  font-family:var(--body);font-size:17px;color:var(--ink);height:100%;
+}
+#q::placeholder{color:var(--slate-2)}
+#q:disabled{cursor:progress}
+.kbd{
+  font-family:var(--mono);font-size:11px;font-weight:700;color:var(--slate-2);
+  border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;
+  padding:3px 7px;background:var(--paper);flex:none;
+}
+.clearbtn{
+  border:0;background:transparent;color:var(--slate);cursor:pointer;
+  font-size:20px;line-height:1;padding:6px;border-radius:6px;display:none;
+}
+.clearbtn:hover{color:var(--ink)}
+.searching .clearbtn{display:block}
+.searching .kbd{display:none}
+
+.searchmeta{
+  margin-top:12px;min-height:20px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.03em;color:var(--slate);
+}
+.searchmeta b{color:var(--accent);font-weight:700}
+
+.notice{max-width:var(--maxw);margin:0 auto 20px;padding:0 24px}
+.notice-in{
+  background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 34%,transparent);
+  border-radius:var(--r);padding:14px 18px;
+  font-size:14.5px;color:var(--warn);
+}
+.notice-in strong{font-weight:600}
+.notice-in code{font-family:var(--mono);font-size:12.5px}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.shell{
+  max-width:var(--maxw);margin:0 auto;padding:0 24px 96px;
+  display:grid;grid-template-columns:var(--rail) 1fr;gap:44px;align-items:start;
+}
+
+.rail{position:sticky;top:88px}
+.rail-title{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--slate-2);margin:0 0 12px;padding-left:12px;
+}
+.cats{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.cat{
+  width:100%;display:flex;align-items:center;gap:10px;
+  border:0;background:transparent;cursor:pointer;text-align:left;
+  padding:9px 12px;border-radius:9px;color:var(--slate);
+  font-family:var(--body);font-size:14.5px;
+  transition:background .14s,color .14s;
+}
+.cat:hover{background:var(--line-soft);color:var(--ink)}
+.cat .label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat .count{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  color:var(--slate-2);flex:none;font-variant-numeric:tabular-nums;
+}
+.cat[aria-pressed="true"]{
+  background:var(--accent-soft);color:var(--accent-ink);font-weight:600;
+  box-shadow:inset 2px 0 0 var(--accent);
+}
+.cat[aria-pressed="true"] .count{color:var(--accent-ink)}
+.cat[data-empty="true"]{opacity:.34;pointer-events:none}
+
+.listhead{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding-bottom:14px;margin-bottom:18px;border-bottom:1px solid var(--line);
+}
+.listhead h2{
+  font-family:var(--display);font-weight:700;font-size:20px;
+  letter-spacing:-.018em;margin:0;
+}
+.linkbtn{
+  border:0;background:transparent;cursor:pointer;color:var(--slate);
+  font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.05em;
+  text-transform:uppercase;padding:4px 6px;border-radius:6px;
+}
+.linkbtn:hover{color:var(--accent-ink);background:var(--line-soft)}
+
+/* ============================================================
+   FAQ ITEMS
+   ============================================================ */
+.items{display:flex;flex-direction:column;gap:10px}
+.item{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden;transition:border-color .16s, box-shadow .16s;
+}
+.item:hover{border-color:var(--slate-2)}
+.item.open{border-color:var(--accent);box-shadow:var(--shadow)}
+.item[hidden]{display:none}
+
+.q{
+  width:100%;display:flex;align-items:flex-start;gap:14px;
+  border:0;background:transparent;cursor:pointer;text-align:left;
+  padding:18px 20px;color:var(--ink);font-family:var(--body);
+  font-size:16.5px;font-weight:600;line-height:1.42;letter-spacing:-.006em;
+}
+.q .chev{
+  flex:none;margin-top:3px;color:var(--slate-2);
+  transition:transform .22s ease, color .16s;
+}
+.item.open .q .chev{transform:rotate(90deg);color:var(--accent)}
+.q .qtext{flex:1;min-width:0}
+.q .tag{
+  flex:none;font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--slate-2);
+  border:1px solid var(--line);border-radius:20px;padding:3px 9px;
+  margin-top:2px;white-space:nowrap;
+}
+
+.a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .24s ease}
+.item.open .a{grid-template-rows:1fr}
+.a-in{overflow:hidden}
+.a-body{padding:0 20px 20px 54px;color:var(--ink-2);font-size:15.5px}
+.a-body > *:first-child{margin-top:0}
+.a-body > *:last-child{margin-bottom:0}
+.a-body p{margin:0 0 12px}
+.a-body ul,.a-body ol{margin:0 0 12px;padding-left:20px}
+.a-body li{margin-bottom:6px}
+.a-body code{
+  font-family:var(--mono);font-size:13px;
+  background:var(--line-soft);border:1px solid var(--line);
+  padding:1px 5px;border-radius:5px;color:var(--ink);
+}
+.a-body strong{color:var(--ink);font-weight:600}
+
+.a-foot{
+  padding:12px 20px 16px 54px;border-top:1px solid var(--line-soft);
+  display:flex;gap:6px;
+}
+
+mark{background:var(--amber);color:var(--amber-deep);border-radius:3px;padding:0 2px;font-weight:600}
+
+/* inline video */
+/* ============================================================
+   SLIDE-OUT MENU
+   ============================================================ */
+.menubtn{
+  height:34px;width:34px;padding:0;border-radius:9px;flex:none;
+  border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  cursor:pointer;display:grid;place-items:center;
+  transition:border-color .15s,color .15s;
+}
+.menubtn:hover{border-color:var(--slate-2);color:var(--ink)}
+
+.scrim{
+  position:fixed;inset:0;z-index:55;
+  background:rgba(14,20,27,.44);backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .22s;
+}
+.scrim.open{opacity:1;pointer-events:auto}
+
+.drawer{
+  position:fixed;top:0;left:0;bottom:0;width:290px;max-width:84vw;z-index:60;
+  background:var(--card);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;
+  transform:translateX(-100%);visibility:hidden;
+  transition:transform .26s cubic-bezier(.4,0,.2,1), visibility 0s .26s;
+  box-shadow:0 0 40px -10px rgba(0,0,0,.35);
+}
+.drawer.open{transform:none;visibility:visible;transition:transform .26s cubic-bezier(.4,0,.2,1), visibility 0s}
+
+.drawer-head{
+  display:flex;align-items:center;gap:10px;
+  padding:16px 16px 14px;border-bottom:1px solid var(--line-soft);
+}
+.drawer-head .brand-name{flex:1}
+.drawer-close{
+  border:0;background:transparent;color:var(--slate);cursor:pointer;
+  font-size:22px;line-height:1;padding:4px 8px;border-radius:7px;flex:none;
+}
+.drawer-close:hover{color:var(--ink);background:var(--line-soft)}
+
+.drawer-nav{flex:1;overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.navitem{
+  display:flex;align-items:center;gap:12px;width:100%;
+  border:0;background:transparent;cursor:pointer;text-align:left;
+  padding:11px 12px;border-radius:9px;color:var(--slate);
+  font-family:var(--body);font-size:15px;
+  transition:background .14s,color .14s;
+}
+.navitem:hover{background:var(--line-soft);color:var(--ink)}
+.navitem svg{flex:none;color:var(--slate-2)}
+.navitem .navlabel{flex:1;min-width:0}
+.navitem .wiptag{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;
+  color:var(--slate-2);border:1px solid var(--line);border-radius:20px;
+  padding:2px 7px;flex:none;
+}
+.navitem[aria-current="true"]{
+  background:var(--accent-soft);color:var(--accent-ink);font-weight:600;
+  box-shadow:inset 2px 0 0 var(--accent);
+}
+.navitem[aria-current="true"] svg{color:var(--accent)}
+
+.drawer-foot{
+  padding:14px 18px 18px;border-top:1px solid var(--line-soft);
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--slate-2);
+}
+
+/* work-in-progress panel */
+.wip{max-width:var(--maxw);margin:0 auto;padding:0 24px 96px}
+.wip-in{
+  border:1px dashed var(--line);border-radius:var(--r);background:var(--card);
+  padding:64px 32px;text-align:center;
+}
+.wip-badge{
+  display:inline-block;margin-bottom:16px;
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent-ink);background:var(--accent-soft);
+  border-radius:20px;padding:5px 13px;
+}
+.wip-in p{margin:0 auto;max-width:44ch;color:var(--slate);font-size:15.5px}
+
+.videowrap{margin:0 0 16px;max-width:520px}
+.video-link{
+  display:inline-block;margin-top:7px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.05em;
+  color:var(--slate);text-decoration:none;
+}
+.video-link:hover{color:var(--accent-ink);text-decoration:underline}
+.video{
+  position:relative;aspect-ratio:16/9;width:100%;max-width:520px;
+  margin:0;border-radius:10px;overflow:hidden;
+  border:1px solid var(--line);background:var(--line-soft);
+}
+.video iframe,.video img{width:100%;height:100%;border:0;display:block;object-fit:cover}
+.video-play{
+  position:absolute;inset:0;width:100%;height:100%;padding:0;
+  border:0;background:transparent;cursor:pointer;display:block;
+}
+.video-play::after{
+  content:"";position:absolute;inset:0;
+  background:rgba(14,20,27,.20);transition:background .16s;
+}
+.video-play:hover::after{background:rgba(14,20,27,.06)}
+.video-btn{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:58px;height:58px;border-radius:50%;z-index:2;
+  background:var(--accent);color:#fff;
+  display:grid;place-items:center;
+  box-shadow:0 6px 20px -6px rgba(0,0,0,.5);
+  transition:transform .16s;
+}
+[data-theme="dark"] .video-btn{color:#0C1116}
+.video-play:hover .video-btn{transform:translate(-50%,-50%) scale(1.07)}
+.video-btn svg{margin-left:3px}
+
+.skel{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  height:60px;position:relative;overflow:hidden;
+}
+.skel::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,var(--line-soft),transparent);
+  animation:sweep 1.3s ease-in-out infinite;
+}
+@keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+.empty{
+  border:1px dashed var(--line);border-radius:var(--r);
+  padding:52px 28px;text-align:center;background:var(--card);
+}
+.empty h3{font-family:var(--display);font-weight:700;font-size:19px;margin:0 0 8px}
+.empty p{margin:0 0 18px;color:var(--slate);font-size:15px}
+
+.toast{
+  position:fixed;left:50%;bottom:28px;transform:translate(-50%,14px);
+  background:var(--ink);color:var(--paper);
+  font-family:var(--mono);font-size:12px;letter-spacing:.04em;
+  padding:10px 18px;border-radius:9px;z-index:80;
+  opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
+.foot-in{
+  max-width:var(--maxw);margin:0 auto;
+  font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--slate-2);
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;gap:26px}
+  .rail{position:static}
+  .rail-title{padding-left:0}
+  .cats{flex-direction:row;flex-wrap:wrap;gap:8px}
+  .cat{width:auto;padding:7px 13px;border:1px solid var(--line);border-radius:20px;font-size:13.5px}
+  .cat[aria-pressed="true"]{box-shadow:none;border-color:var(--accent)}
+  .hero{padding:36px 20px 24px}
+  .topbar-in,.shell,.notice,.wip{padding-left:20px;padding-right:20px}
+  .a-body,.a-foot{padding-left:20px}
+  .q .tag{display:none}
+  #refreshLabel{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+@media print{
+  .topbar,.searchwrap,.rail,.listhead,.a-foot,.toast,.foot,.notice,.drawer,.scrim{display:none}
+  .a{grid-template-rows:1fr}
+  .item{break-inside:avoid;border-color:#ccc}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <button class="menubtn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="brand">
+      <div class="brand-mark" id="brandMark">FA</div>
+      <div class="brand-name" id="brandName">ARC Agent FAQ</div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <button class="iconbtn" id="refreshBtn" type="button" aria-label="Reload content from the sheet">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
+      <span id="refreshLabel">Refresh</span>
+    </button>
+    <button class="iconbtn" id="themeBtn" type="button" aria-label="Switch color theme">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Dark</span>
+    </button>
+  </div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="drawer" id="drawer" aria-label="Sections">
+  <div class="drawer-head">
+    <div class="brand-mark" id="drawerMark">AR</div>
+    <div class="brand-name" id="drawerName">ARC Agent FAQ</div>
+    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close menu">&times;</button>
+  </div>
+  <nav class="drawer-nav" id="drawerNav"></nav>
+  <div class="drawer-foot" id="drawerFoot">More sections coming soon</div>
+</aside>
+
+<section class="hero">
+  <p class="eyebrow" id="eyebrow">Knowledge base</p>
+  <h1 id="heroTitle">Answers while you&rsquo;re still on the call.</h1>
+  <p class="lede" id="heroLede">Search every question below. Results filter as you type, and matching words are highlighted so you can spot the answer fast.</p>
+
+  <div class="searchwrap" id="searchwrap">
+    <div class="searchbox" id="searchbox">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Loading questions&hellip;" autocomplete="off" spellcheck="false" aria-label="Search the FAQ" disabled>
+      <span class="kbd">/</span>
+      <button class="clearbtn" id="clearBtn" type="button" aria-label="Clear search">&times;</button>
+    </div>
+    <div class="searchmeta" id="meta"></div>
+  </div>
+</section>
+
+<div class="notice" id="notice" hidden><div class="notice-in" id="noticeText"></div></div>
+
+<main class="shell" id="shell">
+  <nav class="rail" aria-label="Categories">
+    <p class="rail-title">Browse by topic</p>
+    <ul class="cats" id="cats"></ul>
+  </nav>
+
+  <div>
+    <div class="listhead">
+      <h2 id="listTitle">All questions</h2>
+      <button class="linkbtn" id="toggleAll" type="button" hidden>Expand all</button>
+    </div>
+    <div class="items" id="items"></div>
+    <div class="items" id="skeleton">
+      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    </div>
+    <div class="empty" id="empty" hidden>
+      <h3>No matches for that search</h3>
+      <p>Try a shorter phrase, or a single keyword.</p>
+      <button class="iconbtn" id="resetBtn" type="button">Clear search</button>
+    </div>
+  </div>
+</main>
+
+<section class="wip" id="wip" hidden>
+  <div class="wip-in">
+    <span class="wip-badge">Work in progress</span>
+    <p>Nothing here yet. This section is a placeholder, so seeing this page means the navigation is working.</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span id="footLeft">ARC Agent FAQ</span>
+    <span id="footRight">Loading</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast">Link copied</div>
+
+<script>
+/* ==========================================================================
+   1. CONNECT THE SHEET
+
+   In Google Sheets:  File -> Share -> Publish to web
+     - pick the FAQ tab (not "Entire document")
+     - pick "Comma-separated values (.csv)"
+     - click Publish, then copy the URL it gives you
+   Paste that URL between the quotes below.
+
+   Your sheet needs a header row. Column names are matched case-insensitively
+   and can be in any order. Only Question and Answer are required:
+
+     Category | Question | Answer | Order
+
+   Order is an optional number controlling sort position, so you can reorder
+   the page without reordering rows. Rows with an empty Question are skipped,
+   which means blank spacer rows in the sheet are harmless.
+
+   Google caches the published CSV for a few minutes, so edits can take up to
+   ~5 minutes to appear. The Refresh button re-fetches.
+   ========================================================================== */
+/* ==========================================================================
+   1. WHERE THE CONTENT COMES FROM
+
+   USE_SHEET = false  -> the page uses the built-in list below.
+                         No network, no server. Double-click and it works.
+   USE_SHEET = true   -> the page pulls live from the published Google Sheet
+                         at SHEET_CSV_URL, and falls back to FAQ_CONTENT if
+                         it can't reach it.
+
+   The sheet route only works when the page is served over http(s). A page
+   opened straight from disk (a file:// address) cannot make network requests.
+   That is a browser rule, not a setting.
+   ========================================================================== */
+const USE_SHEET = false;
+
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTG8nR-XM7UkAPVqL0ZKRdSb4NT5PFOKBydX42dZnoxmaDyBXwilsi5wRWdZRUZClxRdjzY9a7JsLrR/pub?gid=0&single=true&output=csv";
+
+/* ==========================================================================
+   2. SITE SETTINGS
+   ========================================================================== */
+const SITE = {
+  name:     "ARC Agent FAQ",
+  initials: "AR",
+  eyebrow:  "Call floor reference",
+  title:    "Answers while you're still on the call.",
+  lede:     "Search every question below. Results filter as you type and matching words are highlighted, so you can find the wording you need without leaving the customer waiting."
+};
+
+/* ==========================================================================
+   2b. MENU SECTIONS
+
+   Everything in the slide-out menu. Only the section with ready:true shows
+   real content; the others render the "work in progress" panel, which is how
+   you can tell the navigation is wired up.
+
+   To bring a section to life later, give it ready:true and content of its own.
+   Rename or reorder freely, but keep one section with id "faq".
+   ========================================================================== */
+const SECTIONS = [
+  { id:"faq",     label:"FAQ", ready:true,
+    icon:'<path d="M9.1 9a3 3 0 1 1 4 2.8c-.7.3-1.1 1-1.1 1.7v.5"/><circle cx="12" cy="17.5" r=".6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="9"/>' },
+  { id:"shows",   label:"Shows / Sales", ready:false,
+    icon:'<path d="M3 20h18M6 20V11M11 20V5M16 20v-7M21 20v-4"/>',
+    blurb:"Show schedules, sales numbers and event details will live here." },
+  { id:"scripts", label:"Scripts", ready:false,
+    icon:'<path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v6h6M9 13h7M9 17h5"/>',
+    blurb:"Call scripts, openers and rebuttals will live here." },
+  { id:"links",   label:"Important links", ready:false,
+    icon:'<path d="M10 13.5a4 4 0 0 0 5.7.4l3-3a4 4 0 0 0-5.7-5.7l-1.7 1.7"/><path d="M14 10.5a4 4 0 0 0-5.7-.4l-3 3a4 4 0 0 0 5.7 5.7l1.7-1.7"/>',
+    blurb:"Quick links to the tools and forms you use every shift will live here." }
+];
+
+/* ==========================================================================
+   3. FALLBACK CONTENT
+   Used only when the sheet can't be reached, so the page never renders blank
+   and still works offline. Worth pasting a copy of the real content here
+   once the sheet is settled.
+   ========================================================================== */
+const FALLBACK = [
+  /* ---------- On the call ---------- */
+  {
+    category: "On the call",
+    question: "No vehicle information on file",
+    answer:
+"Don't mention their vehicle at all. Say:\n\n" +
+"**“We'd like to invite you to explore our latest models. When would be a convenient time for you to visit us?”**\n\n" +
+"If they're interested, then ask what they're currently driving."
+  },
+  {
+    category: "On the call",
+    question: "Questions I can't answer",
+    answer:
+"**Never say “I don't know.”**\n\n" +
+"If they're interested in the event:\n\n" +
+"**“That's a great question! I will have our host, JOHN SMITH, give you a call closer to your appointment with this information.”**\n\n" +
+"If they haven't said whether they're interested yet:\n\n" +
+"**“That's a great question! Unfortunately I do not have that information on hand, but I can have our host of the event JOHN SMITH give you a call with this information, does that sound good?”**"
+  },
+  {
+    category: "On the call",
+    question: "“Where are you calling from?”",
+    answer:
+"**“I am calling for [dealership name]. I am not directly on site. We are part of the special events team for [dealership name].”**\n\n" +
+"We **never** say we're calling on behalf of all dealerships or multiple dealerships. Keep it specialized and unique to the one dealership you're calling for at the time.\n\n" +
+"We **never** tell them we work for Absolute Results or ARC."
+  },
+  {
+    category: "On the call",
+    question: "Is the host a dealership employee?",
+    answer:
+"No. The host is not an employee of the dealership, though they're usually local.\n\n" +
+"They're a car industry expert who is there during the event to ensure an exceptional customer experience."
+  },
+  {
+    category: "On the call",
+    question: "“That number is from out of town”",
+    answer:
+"Let them know we'll have it looked into. **Never apologize**, because apologizing admits guilt.\n\n" +
+"If they're concerned we aren't calling from a legitimate business, offer to have the host call them from the dealership, so the dealership's number shows up instead.\n\n" +
+"Mention it in **ARC General** if the phone number needs to be changed."
+  },
+  {
+    category: "On the call",
+    question: "The customer wants a manager",
+    answer:
+"If they're asking because of too many calls, assure them you can place them on the **Do Not Call** list, and that it goes directly to the manager of the dealership so it's completed for them.\n\n" +
+"If they continue to insist, give them the dealership phone number from your incentive sheet and let them know you don't have the ability to transfer.\n\n" +
+"If they've provided details you feel are worth sending on, send it as a **hand raiser** with detailed notes so it can be taken care of from their end."
+  },
+  {
+    category: "On the call",
+    question: "Aggressive or abusive customers",
+    answer:
+"Remain calm and professional. Do not argue or engage with the customer's behaviour.\n\n" +
+"Politely advise them that the conversation cannot continue if the behaviour persists. If it continues, end the call appropriately and disposition as **DNC**.\n\n" +
+"There's a training video for this: **Dealing with Angry Customers - Abusive Language**\n\n" +
+"https://www.youtube.com/watch?v=0eSmZxdDZGI"
+  },
+  {
+    category: "On the call",
+    question: "The customer doesn't speak English",
+    answer:
+"Find out which language the customer speaks. We have representatives for:\n\n" +
+"- **Punjabi**: Ranjita, Satvir\n" +
+"- **Mandarin / Cantonese**: Samantha\n" +
+"- **French**: Ryanna, Chance, Ines\n\n" +
+"Send a message to the appropriate agent in Google Chat with the customer's name, phone number, the name of the dealership, the province the dealership is in, and disposition as **Try Again**. Any additional information you can pass along makes it easier for them to make the appointment.\n\n" +
+"If the customer speaks a language we're unable to provide for, send it off as a **Hand Raiser**, asking whether anyone at the dealership speaks that language."
+  },
+
+  /* ---------- Appointments ---------- */
+  {
+    category: "Appointments",
+    question: "Does a husband and wife count as one appointment?",
+    answer:
+"It counts as **one appointment** if both of them book.\n\n" +
+"You receive **two bonuses** if both of them purchase a vehicle."
+  },
+  {
+    category: "Appointments",
+    question: "Booking after the event has ended",
+    answer:
+"Yes, you can.\n\n" +
+"Inform the customer that while event offers cannot be guaranteed after the event, there may still be other attractive deals available. Book the appointment and provide details in your notes to the dealership.\n\n" +
+"The host may call them to try to bring them in during an event, and may have offers to entice them to change their mind.\n\n" +
+"You will not get a bonus for booking after the event. It's still worth doing, because the dealership is happy for the appointment, it makes us look good, and every appointment helps the dealership decide to book another event with us."
+  },
+
+  /* ---------- Tech issues ---------- */
+  {
+    category: "Tech issues",
+    question: "Headset not working",
+    answer:
+"Report it to **Darcy, Gary, Alexandrea, or Heather** immediately, then work through these:\n\n" +
+"1. Try reloading.\n" +
+"2. Restart your computer.\n" +
+"3. Check that the sound is set to a reasonable level on your computer.\n" +
+"4. Clear your cache and cookies.\n" +
+"5. Ensure your microphone is working in Google Chrome.\n" +
+"6. Unplug the headset and plug it back in.\n\n" +
+"Report back to the same person once it's sorted, so the time frame can be reported."
+  },
+  {
+    category: "Tech issues",
+    question: "Phone line cutting out",
+    answer:
+"Report it in the **Volie/Tech Issues** Google Chat right away, then:\n\n" +
+"1. Restart your web browser.\n" +
+"2. Restart your computer if that doesn't resolve it.\n" +
+"3. Clear your cache and cookies if it continues.\n\n" +
+"It may be a Volie issue on their end. Report back in Volie/Tech Issues once the issue has been resolved, so the time frame can be recorded."
+  },
+  {
+    category: "Tech issues",
+    question: "Volie is down",
+    answer:
+"Inform admin in **Volie/Tech Issues**, then:\n\n" +
+"1. Check that your internet is connected.\n" +
+"2. Restart your web browser.\n" +
+"3. Restart your computer if that doesn't work."
+  },
+  {
+    category: "Tech issues",
+    question: "Clearing cache and cookies",
+    answer:
+"In Google Chrome:\n\n" +
+"1. Go to the three vertical dots in the top right hand corner of your screen and click them.\n" +
+"2. Go to **Delete browsing data** and click it.\n" +
+"3. Click **Delete data**.\n" +
+"4. It's done. **Do not** go to the safety check.\n\n" +
+"If these steps don't work for your browser, search online for instructions on how to clear cache and cookies for that browser."
+  },
+
+  /* ---------- Admin & pay ---------- */
+  {
+    category: "Admin & pay",
+    question: "Commission tiers and bonuses",
+    answer:
+"Commission is based on the number of customers who show up to the appointments and hand raisers you create. Which tier you fall under for the monthly period depends on how many vehicles you sell.\n\n" +
+"**Tier 1: 1-5 units sold**\n\n" +
+"- $5 per appointment or hand raiser that shows up for an event\n" +
+"- $10 per vehicle sale from your appointments or hand raisers\n\n" +
+"**Tier 2: 6+ units sold**\n\n" +
+"- $5 per appointment or hand raiser that shows up for an event\n" +
+"- $15 per vehicle sale from your appointments or hand raisers (retroactive)\n\n" +
+"**Tier 3: 10+ units sold**\n\n" +
+"- $7 per appointment or hand raiser that shows up for an event\n" +
+"- $20 per vehicle sale from your appointments or hand raisers (retroactive)"
+  },
+  {
+    category: "Admin & pay",
+    question: "Fixing a disposition error",
+    answer:
+"To avoid disposition errors, don't click on the disposition options until you know which option you'll be choosing.\n\n" +
+"Mistakes happen though. When one does, make note of:\n\n" +
+"- The customer's first and last name\n" +
+"- The dealership\n" +
+"- The phone number\n" +
+"- What the disposition needs to be changed to\n" +
+"- Notes or details that should be provided to the dealership, if applicable\n\n" +
+"Send it in **Disposition Edits** on Google Chat. Darcy, Alexandrea, Heather, or Gary will have it fixed for you."
+  },
+  {
+    category: "Admin & pay",
+    question: "A complaint about your call",
+    answer:
+"Provide the details to **Darcy** via Google Chat so we can return the call.\n\n" +
+"Include all the details and information of the call that may be helpful, and don't forget:\n\n" +
+"- Dealership\n" +
+"- Customer's first and last name\n" +
+"- Phone number"
+  },
+  {
+    category: "Admin & pay",
+    question: "End of shift checklist",
+    answer:
+"1. Clock out in **ADP**.\n" +
+"2. Log out of **all queues**.\n" +
+"3. Log out of **Volie**.\n\n" +
+"Contact **Gary** if you ever have any issues with ADP."
+  }
+];
+
+/* ==========================================================================
+   4. Engine - no need to edit below this line.
+   ========================================================================== */
+(function(){
+  const $ = s => document.querySelector(s);
+  const itemsEl=$("#items"), catsEl=$("#cats"), qEl=$("#q"), metaEl=$("#meta"),
+        emptyEl=$("#empty"), toastEl=$("#toast"), skelEl=$("#skeleton"),
+        noticeEl=$("#notice"), noticeText=$("#noticeText");
+
+  $("#brandName").textContent = SITE.name;
+  $("#brandMark").textContent = SITE.initials;
+  $("#eyebrow").textContent   = SITE.eyebrow;
+  $("#heroTitle").textContent = SITE.title;
+  $("#heroLede").textContent  = SITE.lede;
+  $("#footLeft").textContent  = SITE.name;
+  document.title = SITE.name;
+
+  let records = [], nodes = [], catNames = [], activeCat = "All", tokens = [], allOpen = false;
+
+  /* ---------- CSV parsing (quotes, commas and newlines inside cells) -------- */
+  function parseCSV(text){
+    const rows=[]; let row=[], field="", i=0, inQ=false;
+    text = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+    while(i < text.length){
+      const c = text[i];
+      if(inQ){
+        if(c === '"'){
+          if(text[i+1] === '"'){ field += '"'; i += 2; continue; }
+          inQ = false; i++; continue;
+        }
+        field += c; i++; continue;
+      }
+      if(c === '"'){ inQ = true; i++; continue; }
+      if(c === ','){ row.push(field); field = ""; i++; continue; }
+      if(c === '\n'){ row.push(field); rows.push(row); row = []; field = ""; i++; continue; }
+      field += c; i++;
+    }
+    if(field.length || row.length){ row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  /* ---------- markdown-lite -> HTML ---------------------------------------- */
+  const escHTML = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  function inline(s){
+    return s
+      .replace(/`([^`]+)`/g, function(m,x){ return "<code>" + x + "</code>"; })
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>")
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+               '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  }
+
+  /* A YouTube link alone on its own line renders as a click-to-play video.
+     Nothing loads from YouTube until someone presses play. */
+  function videoHTML(id){
+    return '<div class="videowrap">' +
+             '<div class="video" data-yt="' + id + '">' +
+               '<button class="video-play" type="button" aria-label="Play the video">' +
+                 '<img src="https://i.ytimg.com/vi/' + id + '/hqdefault.jpg" alt="" loading="lazy">' +
+                 '<span class="video-btn"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>' +
+               '</button>' +
+             '</div>' +
+             '<a class="video-link" href="https://www.youtube.com/watch?v=' + id + '" target="_blank" rel="noopener">Open on YouTube \u2197</a>' +
+           '</div>';
+  }
+
+  function toHTML(raw){
+    const src = escHTML(String(raw || "").trim());
+    if(!src) return "";
+    return src.split(/\n\s*\n/).map(function(block){
+      const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+      if(!lines.length) return "";
+      if(lines.length === 1){
+        const yt = lines[0].match(/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?[^\s]*\bv=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
+        if(yt) return videoHTML(yt[1]);
+      }
+      if(lines.every(l => /^[-*\u2022]\s+/.test(l)))
+        return "<ul>" + lines.map(l => "<li>" + inline(l.replace(/^[-*\u2022]\s+/,"")) + "</li>").join("") + "</ul>";
+      if(lines.every(l => /^\d+[.)]\s+/.test(l)))
+        return "<ol>" + lines.map(l => "<li>" + inline(l.replace(/^\d+[.)]\s+/,"")) + "</li>").join("") + "</ol>";
+      return "<p>" + lines.map(inline).join("<br>") + "</p>";
+    }).join("");
+  }
+
+  /* ---------- helpers ------------------------------------------------------- */
+  const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60);
+  const strip = h => { const d=document.createElement("div"); d.innerHTML=h; return d.textContent||""; };
+  function showNotice(html){ noticeText.innerHTML = html; noticeEl.hidden = false; }
+
+  /* Try the cache-busted URL first, then the plain one. Some networks and
+     proxies choke on the extra query parameter through Google's redirect. */
+  async function fetchCSV(){
+    const sep = SHEET_CSV_URL.indexOf("?") > -1 ? "&" : "?";
+    const attempts = [SHEET_CSV_URL + sep + "cb=" + Date.now(), SHEET_CSV_URL];
+    let lastErr;
+    for(const u of attempts){
+      try{
+        const res = await fetch(u);
+        if(!res.ok) throw new Error("The sheet returned HTTP " + res.status + ".");
+        return await res.text();
+      }catch(e){ lastErr = e; }
+    }
+    throw lastErr;
+  }
+
+  /* ---------- load ---------------------------------------------------------- */
+  async function load(){
+    if(!USE_SHEET){
+      $("#refreshBtn").hidden = true;
+      return build(FALLBACK, "built-in content");
+    }
+    if(!/^https?:\/\//.test(SHEET_CSV_URL)){
+      showNotice("<strong>The sheet isn&rsquo;t connected yet.</strong> Open this file, find <code>SHEET_CSV_URL</code> near the top of the script, and paste in the URL from File &rarr; Share &rarr; Publish to web &rarr; CSV. Showing sample content until then.");
+      return build(FALLBACK, "sample content");
+    }
+    try{
+      const rows = parseCSV(await fetchCSV()).filter(r => r.some(c => c.trim()));
+      if(rows.length < 2) throw new Error("The sheet has a header row but no questions under it.");
+
+      const head = rows[0].map(h => h.trim().toLowerCase());
+      const col = n => head.findIndex(h => h === n || h.indexOf(n) === 0);
+      const iC = col("categ"), iQ = col("question"), iA = col("answer"), iO = col("order");
+      if(iQ < 0 || iA < 0)
+        throw new Error("Couldn&rsquo;t find a <code>Question</code> and <code>Answer</code> column in the header row.");
+
+      const data = rows.slice(1)
+        .filter(r => (r[iQ] || "").trim())
+        .map(function(r, n){
+          return {
+            category: (iC >= 0 ? (r[iC] || "") : "").trim() || "General",
+            question: r[iQ].trim(),
+            answer:   (r[iA] || "").trim(),
+            order:    (iO >= 0 && (r[iO] || "").trim() !== "") ? Number(r[iO]) : n + 1000
+          };
+        })
+        .sort((a,b) => a.order - b.order);
+
+      if(!data.length) throw new Error("Every row had an empty Question cell.");
+      noticeEl.hidden = true;
+      build(data, "live from the sheet");
+    }catch(err){
+      const msg = String(err && err.message || err);
+      let why;
+      if(location.protocol === "file:"){
+        why = "This page is open straight from disk, so its address starts with <code>file://</code>. Browsers block those pages from making network requests, which is why the sheet is unreachable. Nothing is wrong with the sheet itself. " +
+              "Serve the file over http instead: in its folder run <code>python3 -m http.server 8000</code>, then open <code>http://localhost:8000/faq-hub.html</code>. Any real host works too.";
+      } else if(/failed to fetch|networkerror|load failed|cors/i.test(msg)){
+        why = "The browser blocked the request before it reached Google. Usual causes: the page is running inside a sandboxed preview pane, the network blocks <code>docs.google.com</code>, or the tab is no longer published to the web.";
+      } else {
+        why = msg + " Check that the tab is still published to the web as CSV.";
+      }
+      showNotice("<strong>Couldn&rsquo;t load the sheet.</strong> " + why + " Showing the built-in copy in the meantime.");
+      build(FALLBACK, "offline copy");
+    }
+  }
+
+  /* ---------- build --------------------------------------------------------- */
+  function build(data, sourceLabel){
+    records = data.map(function(d, i){
+      const html = toHTML(d.answer);
+      return {
+        category: d.category, question: d.question, html: html,
+        id: slug(d.question) || ("q-" + i),
+        hay: (d.question + " " + strip(html) + " " + d.category).toLowerCase()
+      };
+    });
+
+    catsEl.innerHTML = ""; itemsEl.innerHTML = "";
+    catNames = ["All"].concat(Array.from(new Set(records.map(r => r.category))));
+    catNames.forEach(function(name){
+      const li = document.createElement("li");
+      const b  = document.createElement("button");
+      b.className = "cat"; b.type = "button"; b.dataset.cat = name;
+      b.innerHTML = '<span class="label"></span><span class="count"></span>';
+      b.querySelector(".label").textContent = name;
+      b.addEventListener("click", function(){ activeCat = name; render(); });
+      li.appendChild(b); catsEl.appendChild(li);
+    });
+    if(catNames.indexOf(activeCat) === -1) activeCat = "All";
+
+    nodes = records.map(function(r){
+      const el = document.createElement("article");
+      el.className = "item"; el.id = r.id;
+      el.innerHTML =
+        '<button class="q" type="button" aria-expanded="false" aria-controls="a-' + r.id + '">' +
+          '<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>' +
+          '<span class="qtext"></span><span class="tag"></span>' +
+        '</button>' +
+        '<div class="a" id="a-' + r.id + '" role="region">' +
+          '<div class="a-in">' +
+            '<div class="a-body"></div>' +
+            '<div class="a-foot"><button class="linkbtn copy" type="button">Copy link</button></div>' +
+          '</div>' +
+        '</div>';
+      el.querySelector(".qtext").textContent = r.question;
+      el.querySelector(".tag").textContent   = r.category;
+      el.querySelector(".a-body").innerHTML  = r.html;
+      el.querySelector(".q").addEventListener("click", function(){
+        setOpen(el, !el.classList.contains("open"));
+      });
+      el.querySelector(".copy").addEventListener("click", function(e){
+        e.stopPropagation();
+        copyText(location.href.split("#")[0] + "#" + r.id);
+      });
+      itemsEl.appendChild(el);
+      return { rec:r, el:el };
+    });
+
+    skelEl.hidden = true;
+    qEl.disabled = false;
+    qEl.placeholder = "Search questions and answers\u2026";
+    $("#footRight").textContent = sourceLabel + " \u00b7 loaded " +
+      new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
+    render();
+    jumpToHash();
+  }
+
+  function setOpen(el, open){
+    el.classList.toggle("open", open);
+    el.querySelector(".q").setAttribute("aria-expanded", String(open));
+  }
+
+  let toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg || "Link copied";
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 1600);
+  }
+
+  /* navigator.clipboard only exists on https and localhost, so plain http on an
+     internal server needs the old textarea trick. Never claim success blindly. */
+  function copyText(text){
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(text).then(
+        function(){ showToast("Link copied"); },
+        function(){ legacyCopy(text); }
+      );
+    } else {
+      legacyCopy(text);
+    }
+  }
+  function legacyCopy(text){
+    try{
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly","");
+      ta.style.cssText = "position:fixed;top:-1000px;opacity:0";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      showToast(ok ? "Link copied" : "Couldn't copy, press Ctrl+C");
+    }catch(e){
+      showToast("Couldn't copy, press Ctrl+C");
+    }
+  }
+
+  /* ---------- highlighting -------------------------------------------------- */
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  function clearMarks(root){
+    root.querySelectorAll("mark").forEach(function(m){
+      m.replaceWith(document.createTextNode(m.textContent));
+    });
+    root.normalize();
+  }
+  function applyMarks(root, toks){
+    if(!toks.length) return;
+    const rx = new RegExp("(" + toks.map(esc).join("|") + ")", "gi");
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        return n.nodeValue.trim() && n.parentNode.nodeName !== "MARK"
+          ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    const targets = [];
+    while(walker.nextNode()) targets.push(walker.currentNode);
+    targets.forEach(function(node){
+      rx.lastIndex = 0;
+      if(!rx.test(node.nodeValue)) return;
+      rx.lastIndex = 0;
+      const frag = document.createDocumentFragment();
+      let last = 0, m;
+      while((m = rx.exec(node.nodeValue))){
+        frag.append(node.nodeValue.slice(last, m.index));
+        const mk = document.createElement("mark");
+        mk.textContent = m[0];
+        frag.append(mk);
+        last = m.index + m[0].length;
+      }
+      frag.append(node.nodeValue.slice(last));
+      node.replaceWith(frag);
+    });
+  }
+
+  /* ---------- render -------------------------------------------------------- */
+  function render(){
+    tokens = qEl.value.toLowerCase().split(/\s+/).filter(Boolean);
+    const searching = tokens.length > 0;
+    $("#searchbox").parentElement.classList.toggle("searching", searching);
+
+    const counts = {};
+    catNames.forEach(function(c){ counts[c] = 0; });
+    let shown = 0;
+
+    nodes.forEach(function(n){
+      const rec = n.rec, el = n.el;
+      const ok = tokens.every(function(t){ return rec.hay.indexOf(t) > -1; });
+      if(ok){ counts["All"]++; counts[rec.category]++; }
+      const visible = ok && (activeCat === "All" || rec.category === activeCat);
+      el.hidden = !visible;
+
+      const body = el.querySelector(".a-body"), qt = el.querySelector(".qtext");
+      clearMarks(body); clearMarks(qt);
+      if(visible){
+        shown++;
+        if(searching){ applyMarks(body, tokens); applyMarks(qt, tokens); setOpen(el, true); }
+        else if(!allOpen){ setOpen(el, false); }
+      }
+    });
+
+    catsEl.querySelectorAll(".cat").forEach(function(b){
+      const c = b.dataset.cat;
+      b.setAttribute("aria-pressed", String(c === activeCat));
+      b.querySelector(".count").textContent = counts[c];
+      b.dataset.empty = String(counts[c] === 0 && c !== activeCat);
+    });
+
+    $("#listTitle").textContent = activeCat === "All" ? "All questions" : activeCat;
+    emptyEl.hidden = shown > 0;
+    itemsEl.hidden = shown === 0;
+
+    metaEl.innerHTML = searching
+      ? "<b>" + counts["All"] + "</b> of " + records.length + " questions match \u201C" +
+        qEl.value.trim().replace(/</g,"&lt;") + "\u201D"
+      : "<b>" + records.length + "</b> questions across " + (catNames.length - 1) + " topics";
+
+    const ta = $("#toggleAll");
+    ta.textContent = allOpen ? "Collapse all" : "Expand all";
+    ta.hidden = searching || !records.length;
+  }
+
+  function jumpToHash(){
+    if(!location.hash) return;
+    const el = document.getElementById(location.hash.slice(1));
+    if(el){ setOpen(el, true); setTimeout(function(){ el.scrollIntoView({block:"center"}); }, 60); }
+  }
+
+  /* ---------- menu and sections -------------------------------------------- */
+  const drawerEl=$("#drawer"), scrimEl=$("#scrim"), navEl=$("#drawerNav"), menuBtn=$("#menuBtn");
+  let activeSection = "faq";
+
+  $("#drawerMark").textContent = SITE.initials;
+  $("#drawerName").textContent = SITE.name;
+
+  SECTIONS.forEach(function(sec){
+    const b = document.createElement("button");
+    b.className = "navitem"; b.type = "button"; b.dataset.id = sec.id;
+    b.innerHTML =
+      '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + sec.icon + '</svg>' +
+      '<span class="navlabel"></span>' +
+      (sec.ready ? "" : '<span class="wiptag">WIP</span>');
+    b.querySelector(".navlabel").textContent = sec.label;
+    b.addEventListener("click", function(){ setSection(sec.id); closeDrawer(); });
+    navEl.appendChild(b);
+  });
+
+  function setSection(id){
+    const sec = SECTIONS.filter(function(x){ return x.id === id; })[0] || SECTIONS[0];
+    activeSection = sec.id;
+
+    $("#searchwrap").hidden = !sec.ready;
+    $("#shell").hidden      = !sec.ready;
+    $("#wip").hidden        =  sec.ready;
+    $("#notice").hidden     = $("#notice").hidden || !sec.ready;
+
+    $("#eyebrow").textContent   = sec.ready ? SITE.eyebrow : "Coming soon";
+    $("#heroTitle").textContent = sec.ready ? SITE.title   : sec.label;
+    $("#heroLede").textContent  = sec.ready ? SITE.lede    : (sec.blurb || "");
+    document.title = sec.ready ? SITE.name : sec.label + " \u00b7 " + SITE.name;
+
+    navEl.querySelectorAll(".navitem").forEach(function(b){
+      b.setAttribute("aria-current", String(b.dataset.id === sec.id));
+    });
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  function openDrawer(){
+    drawerEl.classList.add("open"); scrimEl.classList.add("open");
+    menuBtn.setAttribute("aria-expanded","true");
+    const first = navEl.querySelector(".navitem");
+    if(first) first.focus();
+  }
+  function closeDrawer(){
+    drawerEl.classList.remove("open"); scrimEl.classList.remove("open");
+    menuBtn.setAttribute("aria-expanded","false");
+    menuBtn.focus();
+  }
+  const drawerIsOpen = function(){ return drawerEl.classList.contains("open"); };
+
+  menuBtn.addEventListener("click", function(){ drawerIsOpen() ? closeDrawer() : openDrawer(); });
+  $("#drawerClose").addEventListener("click", closeDrawer);
+  scrimEl.addEventListener("click", closeDrawer);
+
+  setSection("faq");
+
+  /* ---------- events -------------------------------------------------------- */
+  let t;
+  qEl.addEventListener("input", function(){ clearTimeout(t); t = setTimeout(render, 90); });
+  $("#clearBtn").addEventListener("click", function(){ qEl.value=""; qEl.focus(); render(); });
+  $("#resetBtn").addEventListener("click", function(){ qEl.value=""; activeCat="All"; qEl.focus(); render(); });
+  $("#toggleAll").addEventListener("click", function(){
+    allOpen = !allOpen;
+    nodes.forEach(function(n){ if(!n.el.hidden) setOpen(n.el, allOpen); });
+    $("#toggleAll").textContent = allOpen ? "Collapse all" : "Expand all";
+  });
+  $("#refreshBtn").addEventListener("click", async function(){
+    const b = $("#refreshBtn");
+    b.classList.add("spin"); b.disabled = true;
+    skelEl.hidden = false; itemsEl.innerHTML = ""; noticeEl.hidden = true;
+    await load();
+    b.classList.remove("spin"); b.disabled = false;
+  });
+  $("#themeBtn").addEventListener("click", function(){
+    const dark = document.documentElement.dataset.theme === "dark";
+    document.documentElement.dataset.theme = dark ? "light" : "dark";
+    $("#themeLabel").textContent = dark ? "Dark" : "Light";
+    $("#themeIcon").textContent  = dark ? "\u25D0" : "\u25D1";
+  });
+  document.addEventListener("click", function(e){
+    const btn = e.target.closest ? e.target.closest(".video-play") : null;
+    if(!btn) return;
+    const wrap = btn.parentElement, id = wrap.dataset.yt;
+    wrap.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + id +
+      '?autoplay=1&rel=0" title="Training video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "/" && activeSection === "faq" && !drawerIsOpen() &&
+       !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)){
+      e.preventDefault(); qEl.focus(); qEl.select();
+    }
+    if(e.key === "Escape"){
+      if(drawerIsOpen()){ closeDrawer(); return; }
+      if(document.activeElement === qEl){ qEl.value=""; render(); }
+    }
+  });
+  if(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches){
+    document.documentElement.dataset.theme = "dark";
+    $("#themeLabel").textContent = "Light"; $("#themeIcon").textContent = "\u25D1";
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>
