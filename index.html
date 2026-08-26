@@ -33,8 +33,9 @@
   --body:"Public Sans",ui-sans-serif,system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 
-  --rail:264px;
-  --maxw:1180px;
+  --rail:240px;
+  --maxw:1120px;
+  --sidebar:256px;
   --r:12px;
 }
 [data-theme="dark"]{
@@ -63,6 +64,7 @@
 html{-webkit-text-size-adjust:100%}
 body{
   margin:0;
+  padding-left:var(--sidebar);
   background:var(--paper);
   color:var(--ink);
   font-family:var(--body);
@@ -74,19 +76,17 @@ a{color:var(--accent-ink);text-decoration-thickness:1px;text-underline-offset:2p
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 
 /* ============================================================
-   TOP BAR
+   SIDEBAR
    ============================================================ */
-.topbar{
-  position:sticky;top:0;z-index:40;
-  background:color-mix(in srgb, var(--paper) 88%, transparent);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--line-soft);
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:var(--sidebar);z-index:30;
+  background:var(--card);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;
 }
-.topbar-in{
-  max-width:var(--maxw);margin:0 auto;padding:14px 24px;
+.side-head{
   display:flex;align-items:center;gap:10px;
+  padding:20px 18px 18px;border-bottom:1px solid var(--line-soft);
 }
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand-mark{
   width:30px;height:30px;border-radius:9px;flex:none;
   background:var(--accent);color:#fff;
@@ -98,10 +98,36 @@ a{color:var(--accent-ink);text-decoration-thickness:1px;text-underline-offset:2p
   font-family:var(--display);font-weight:700;font-size:16px;
   letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.topbar-spacer{flex:1}
+
+.side-nav{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+.navitem{
+  display:flex;align-items:center;gap:12px;width:100%;
+  border:0;background:transparent;cursor:pointer;text-align:left;
+  padding:11px 12px;border-radius:9px;color:var(--slate);
+  font-family:var(--body);font-size:15px;
+  transition:background .14s,color .14s;
+}
+.navitem:hover{background:var(--line-soft);color:var(--ink)}
+.navitem svg{flex:none;color:var(--slate-2)}
+.navitem .navlabel{flex:1;min-width:0}
+.navitem .wiptag{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;
+  color:var(--slate-2);border:1px solid var(--line);border-radius:20px;
+  padding:2px 7px;flex:none;
+}
+.navitem[aria-current="true"]{
+  background:var(--accent-soft);color:var(--accent-ink);font-weight:600;
+  box-shadow:inset 2px 0 0 var(--accent);
+}
+.navitem[aria-current="true"] svg{color:var(--accent)}
+
+.side-foot{
+  padding:12px 14px 16px;border-top:1px solid var(--line-soft);
+  display:flex;gap:8px;flex-wrap:wrap;
+}
 .iconbtn{
   height:34px;padding:0 12px;border-radius:9px;
-  border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  border:1px solid var(--line);background:transparent;color:var(--ink-2);
   font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.04em;
   cursor:pointer;display:inline-flex;align-items:center;gap:7px;
   transition:border-color .15s, color .15s;
@@ -113,7 +139,7 @@ a{color:var(--accent-ink);text-decoration-thickness:1px;text-underline-offset:2p
 /* ============================================================
    HERO
    ============================================================ */
-.hero{max-width:var(--maxw);margin:0 auto;padding:56px 24px 30px}
+.hero{max-width:var(--maxw);margin:0 auto;padding:52px 24px 30px}
 .eyebrow{
   font-family:var(--mono);font-size:11px;font-weight:700;
   letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
@@ -184,7 +210,7 @@ a{color:var(--accent-ink);text-decoration-thickness:1px;text-underline-offset:2p
   display:grid;grid-template-columns:var(--rail) 1fr;gap:44px;align-items:start;
 }
 
-.rail{position:sticky;top:88px}
+.rail{position:sticky;top:28px}
 .rail-title{
   font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.14em;
   text-transform:uppercase;color:var(--slate-2);margin:0 0 12px;padding-left:12px;
@@ -280,71 +306,30 @@ a{color:var(--accent-ink);text-decoration-thickness:1px;text-underline-offset:2p
 mark{background:var(--amber);color:var(--amber-deep);border-radius:3px;padding:0 2px;font-weight:600}
 
 /* inline video */
-/* ============================================================
-   SLIDE-OUT MENU
-   ============================================================ */
-.menubtn{
-  height:34px;width:34px;padding:0;border-radius:9px;flex:none;
-  border:1px solid var(--line);background:var(--card);color:var(--ink-2);
-  cursor:pointer;display:grid;place-items:center;
-  transition:border-color .15s,color .15s;
+/* links section */
+.links{max-width:var(--maxw);margin:0 auto;padding:0 24px 96px}
+.linkgroup{margin-bottom:36px}
+.linkgroup h2{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--slate-2);margin:0 0 14px;
+  padding-bottom:10px;border-bottom:1px solid var(--line);
 }
-.menubtn:hover{border-color:var(--slate-2);color:var(--ink)}
-
-.scrim{
-  position:fixed;inset:0;z-index:55;
-  background:rgba(14,20,27,.44);backdrop-filter:blur(2px);
-  opacity:0;pointer-events:none;transition:opacity .22s;
+.linkgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.linkcard{
+  display:flex;align-items:flex-start;gap:14px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px 18px;text-decoration:none;color:var(--ink);
+  transition:border-color .16s, box-shadow .16s, transform .16s;
 }
-.scrim.open{opacity:1;pointer-events:auto}
-
-.drawer{
-  position:fixed;top:0;left:0;bottom:0;width:290px;max-width:84vw;z-index:60;
-  background:var(--card);border-right:1px solid var(--line);
-  display:flex;flex-direction:column;
-  transform:translateX(-100%);visibility:hidden;
-  transition:transform .26s cubic-bezier(.4,0,.2,1), visibility 0s .26s;
-  box-shadow:0 0 40px -10px rgba(0,0,0,.35);
+.linkcard:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px)}
+.linkcard-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.linkcard-label{font-size:15.5px;font-weight:600;letter-spacing:-.006em;line-height:1.35}
+.linkcard-note{font-size:13.5px;color:var(--slate);line-height:1.45}
+.linkcard-host{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;
+  color:var(--slate-2);white-space:nowrap;flex:none;margin-top:3px;
 }
-.drawer.open{transform:none;visibility:visible;transition:transform .26s cubic-bezier(.4,0,.2,1), visibility 0s}
-
-.drawer-head{
-  display:flex;align-items:center;gap:10px;
-  padding:16px 16px 14px;border-bottom:1px solid var(--line-soft);
-}
-.drawer-head .brand-name{flex:1}
-.drawer-close{
-  border:0;background:transparent;color:var(--slate);cursor:pointer;
-  font-size:22px;line-height:1;padding:4px 8px;border-radius:7px;flex:none;
-}
-.drawer-close:hover{color:var(--ink);background:var(--line-soft)}
-
-.drawer-nav{flex:1;overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:2px}
-.navitem{
-  display:flex;align-items:center;gap:12px;width:100%;
-  border:0;background:transparent;cursor:pointer;text-align:left;
-  padding:11px 12px;border-radius:9px;color:var(--slate);
-  font-family:var(--body);font-size:15px;
-  transition:background .14s,color .14s;
-}
-.navitem:hover{background:var(--line-soft);color:var(--ink)}
-.navitem svg{flex:none;color:var(--slate-2)}
-.navitem .navlabel{flex:1;min-width:0}
-.navitem .wiptag{
-  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;
-  color:var(--slate-2);border:1px solid var(--line);border-radius:20px;
-  padding:2px 7px;flex:none;
-}
-.navitem[aria-current="true"]{
-  background:var(--accent-soft);color:var(--accent-ink);font-weight:600;
-  box-shadow:inset 2px 0 0 var(--accent);
-}
-.navitem[aria-current="true"] svg{color:var(--accent)}
-
-.drawer-foot{
-  padding:14px 18px 18px;border-top:1px solid var(--line-soft);
-  font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--slate-2);
-}
+.linkcard:hover .linkcard-host{color:var(--accent-ink)}
 
 /* work-in-progress panel */
 .wip{max-width:var(--maxw);margin:0 auto;padding:0 24px 96px}
@@ -433,6 +418,24 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
    RESPONSIVE
    ============================================================ */
 @media (max-width:900px){
+  body{padding-left:0}
+  .sidebar{
+    position:static;width:auto;height:auto;
+    border-right:0;border-bottom:1px solid var(--line);
+    flex-direction:row;align-items:center;flex-wrap:wrap;gap:0;
+  }
+  .side-head{border-bottom:0;padding:14px 20px;flex:1}
+  .side-nav{
+    flex:0 0 100%;order:3;flex-direction:row;flex-wrap:wrap;gap:8px;
+    padding:0 20px 14px;overflow:visible;
+  }
+  .navitem{
+    width:auto;padding:7px 13px;border:1px solid var(--line);
+    border-radius:20px;font-size:13.5px;gap:8px;
+  }
+  .navitem[aria-current="true"]{box-shadow:none;border-color:var(--accent)}
+  .navitem svg{display:none}
+  .side-foot{border-top:0;padding:14px 20px;order:2}
   .shell{grid-template-columns:1fr;gap:26px}
   .rail{position:static}
   .rail-title{padding-left:0}
@@ -440,7 +443,8 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
   .cat{width:auto;padding:7px 13px;border:1px solid var(--line);border-radius:20px;font-size:13.5px}
   .cat[aria-pressed="true"]{box-shadow:none;border-color:var(--accent)}
   .hero{padding:36px 20px 24px}
-  .topbar-in,.shell,.notice,.wip{padding-left:20px;padding-right:20px}
+  .shell,.notice,.wip,.links{padding-left:20px;padding-right:20px}
+  .linkgrid{grid-template-columns:1fr}
   .a-body,.a-foot{padding-left:20px}
   .q .tag{display:none}
   #refreshLabel{display:none}
@@ -449,7 +453,8 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
   *{transition-duration:.01ms !important;animation-duration:.01ms !important}
 }
 @media print{
-  .topbar,.searchwrap,.rail,.listhead,.a-foot,.toast,.foot,.notice,.drawer,.scrim{display:none}
+  .sidebar,.searchwrap,.rail,.listhead,.a-foot,.toast,.foot,.notice{display:none}
+  body{padding-left:0}
   .a{grid-template-rows:1fr}
   .item{break-inside:avoid;border-color:#ccc}
 }
@@ -457,16 +462,13 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-in">
-    <button class="menubtn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
-    <div class="brand">
-      <div class="brand-mark" id="brandMark">FA</div>
-      <div class="brand-name" id="brandName">ARC Agent FAQ</div>
-    </div>
-    <div class="topbar-spacer"></div>
+<aside class="sidebar" aria-label="Sections">
+  <div class="side-head">
+    <div class="brand-mark" id="brandMark">AR</div>
+    <div class="brand-name" id="brandName">ARC Agent FAQ</div>
+  </div>
+  <nav class="side-nav" id="sideNav"></nav>
+  <div class="side-foot">
     <button class="iconbtn" id="refreshBtn" type="button" aria-label="Reload content from the sheet">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
       <span id="refreshLabel">Refresh</span>
@@ -475,23 +477,11 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
       <span id="themeIcon">&#9680;</span><span id="themeLabel">Dark</span>
     </button>
   </div>
-</header>
-
-<div class="scrim" id="scrim"></div>
-
-<aside class="drawer" id="drawer" aria-label="Sections">
-  <div class="drawer-head">
-    <div class="brand-mark" id="drawerMark">AR</div>
-    <div class="brand-name" id="drawerName">ARC Agent FAQ</div>
-    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close menu">&times;</button>
-  </div>
-  <nav class="drawer-nav" id="drawerNav"></nav>
-  <div class="drawer-foot" id="drawerFoot">More sections coming soon</div>
 </aside>
 
 <section class="hero">
   <p class="eyebrow" id="eyebrow">Knowledge base</p>
-  <h1 id="heroTitle">Answers while you&rsquo;re still on the call.</h1>
+  <h1 id="heroTitle">ARC FAQ</h1>
   <p class="lede" id="heroLede">Search every question below. Results filter as you type, and matching words are highlighted so you can spot the answer fast.</p>
 
   <div class="searchwrap" id="searchwrap">
@@ -529,6 +519,8 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
     </div>
   </div>
 </main>
+
+<section class="links" id="linksPanel" hidden></section>
 
 <section class="wip" id="wip" hidden>
   <div class="wip-in">
@@ -592,7 +584,7 @@ const SITE = {
   name:     "ARC Agent FAQ",
   initials: "AR",
   eyebrow:  "Call floor reference",
-  title:    "Answers while you're still on the call.",
+  title:    "ARC FAQ",
   lede:     "Search every question below. Results filter as you type and matching words are highlighted, so you can find the wording you need without leaving the customer waiting."
 };
 
@@ -609,15 +601,57 @@ const SITE = {
 const SECTIONS = [
   { id:"faq",     label:"FAQ", ready:true,
     icon:'<path d="M9.1 9a3 3 0 1 1 4 2.8c-.7.3-1.1 1-1.1 1.7v.5"/><circle cx="12" cy="17.5" r=".6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="9"/>' },
-  { id:"shows",   label:"Shows / Sales", ready:false,
+  { id:"shows",   label:"Shows & Sales", ready:false,
     icon:'<path d="M3 20h18M6 20V11M11 20V5M16 20v-7M21 20v-4"/>',
-    blurb:"Show schedules, sales numbers and event details will live here." },
+    blurb:"Monthly Shows & Sales will be shown here." },
   { id:"scripts", label:"Scripts", ready:false,
     icon:'<path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v6h6M9 13h7M9 17h5"/>',
     blurb:"Call scripts, openers and rebuttals will live here." },
-  { id:"links",   label:"Important links", ready:false,
+  { id:"links",   label:"Important links", ready:true, view:"links",
     icon:'<path d="M10 13.5a4 4 0 0 0 5.7.4l3-3a4 4 0 0 0-5.7-5.7l-1.7 1.7"/><path d="M14 10.5a4 4 0 0 0-5.7-.4l-3 3a4 4 0 0 0 5.7 5.7l1.7-1.7"/>',
-    blurb:"Quick links to the tools and forms you use every shift will live here." }
+    eyebrow:"Quick access",
+    title:"Important links",
+    lede:"Every tool, sheet and guide you use on shift. Links open in a new tab, so you won't lose your place here." }
+];
+
+/* ==========================================================================
+   2c. IMPORTANT LINKS
+
+   Grouped by when you reach for them, not alphabetically. Each item needs a
+   label and a url; note is optional and shows as a second line. The domain
+   under each card is worked out automatically, so nothing to maintain there.
+   ========================================================================== */
+const LINKS = [
+  { group: "Every shift", items: [
+    { label:"Volie", url:"https://volie.com/" },
+    { label:"Clock in / out", url:"http://clock.adp.com/" },
+    { label:"Email", url:"http://mail.absoluteresults.com/" },
+    { label:"Work Place", url:"https://absoluteresults.workplace.com/" },
+    { label:"Internet speed test", url:"https://www.speedtest.net/",
+      note:"Worth checking before you report a line issue" }
+  ]},
+  { group: "Schedule & performance", items: [
+    { label:"Work schedule", url:"https://docs.google.com/spreadsheets/d/1rBah4wfzg-Eoo7jOAAIgZNVkWObmyVW5aTBoFNMWbpE/edit?gid=440570234#gid=440570234" },
+    { label:"ARC Shows & Sales 2026", url:"https://docs.google.com/spreadsheets/d/15ilvK24Se5tA8vqGPg7I_IaWKGmCOcI4ys1fugdLA2U/edit?gid=1060368238#gid=1060368238" },
+    { label:"ARC bonus structure", url:"https://docs.google.com/document/d/1AoRopHipLqFGCGuwcZKpKUVeywkaubZ7cvUmJP4VLR0/edit?usp=sharing" }
+  ]},
+  { group: "Pay, time off & benefits", items: [
+    { label:"Paystubs & time card", url:"https://workforcenow.adp.com/workforcenow/login.html",
+      note:"Myself > Time & Attendance > My Timecard" },
+    { label:"Time off requests", url:"https://absoluteresults.bamboohr.com/login.php?r=%2Fhome",
+      note:"BambooHR" },
+    { label:"Benefits", url:"https://my.canadalife.com/sign-in",
+      note:"Canada Life" }
+  ]},
+  { group: "Guides & reference", items: [
+    { label:"Scripts", url:"https://docs.google.com/spreadsheets/d/1Vg1BxXwWrIcbuka5qAuf9xBhgbFrNy4FEcdHsW3G6AY/edit?usp=sharing" },
+    { label:"Disposition definitions", url:"https://docs.google.com/document/d/1s8Q_PCW3jRTnDyEi8gk1ZAaSE24vMHTEm_dImBl1SxM/edit?usp=sharing" },
+    { label:"Inbound calls: how to", url:"https://docs.google.com/document/d/1IK856AwMRV_tqR_qJt-UFuDXBOPGUar9cNWlN-uPHbU/edit?tab=t.0" },
+    { label:"Inbound calls: reference", url:"https://docs.google.com/document/d/1ZZY4olcEJk_TNVIN4BXHxs7M1NG6DddnzC9Totee4hM/edit?tab=t.0#heading=h.150wjynju2kd" },
+    { label:"Volie return call feature", url:"https://docs.google.com/document/d/1A6rcGeiVlZtRa4z3f1ojH1F0mlj97B571-59XzXyG_Q/edit?tab=t.0" },
+    { label:"FAQ source document", url:"https://docs.google.com/document/d/14xxp6qQjFq2U1t65FrKf6HEBC5jdI_dMMffEEpVgeJ0/edit?usp=sharing",
+      note:"The document this page was built from" }
+  ]}
 ];
 
 /* ==========================================================================
@@ -1161,11 +1195,8 @@ const FALLBACK = [
   }
 
   /* ---------- menu and sections -------------------------------------------- */
-  const drawerEl=$("#drawer"), scrimEl=$("#scrim"), navEl=$("#drawerNav"), menuBtn=$("#menuBtn");
+  const navEl = $("#sideNav");
   let activeSection = "faq";
-
-  $("#drawerMark").textContent = SITE.initials;
-  $("#drawerName").textContent = SITE.name;
 
   SECTIONS.forEach(function(sec){
     const b = document.createElement("button");
@@ -1175,46 +1206,68 @@ const FALLBACK = [
       '<span class="navlabel"></span>' +
       (sec.ready ? "" : '<span class="wiptag">WIP</span>');
     b.querySelector(".navlabel").textContent = sec.label;
-    b.addEventListener("click", function(){ setSection(sec.id); closeDrawer(); });
+    b.addEventListener("click", function(){ setSection(sec.id); });
     navEl.appendChild(b);
   });
+
+  function buildLinks(){
+    const host = function(u){
+      try{ return new URL(u).hostname.replace(/^www\./,""); }
+      catch(e){ return ""; }
+    };
+    const panel = $("#linksPanel");
+    panel.innerHTML = "";
+    LINKS.forEach(function(g){
+      const sec = document.createElement("section");
+      sec.className = "linkgroup";
+      const h = document.createElement("h2");
+      h.textContent = g.group;
+      sec.appendChild(h);
+
+      const grid = document.createElement("div");
+      grid.className = "linkgrid";
+      g.items.forEach(function(it){
+        const a = document.createElement("a");
+        a.className = "linkcard";
+        a.href = it.url; a.target = "_blank"; a.rel = "noopener";
+        a.innerHTML =
+          '<span class="linkcard-main">' +
+            '<span class="linkcard-label"></span>' +
+            (it.note ? '<span class="linkcard-note"></span>' : "") +
+          '</span>' +
+          '<span class="linkcard-host"></span>';
+        a.querySelector(".linkcard-label").textContent = it.label;
+        if(it.note) a.querySelector(".linkcard-note").textContent = it.note;
+        a.querySelector(".linkcard-host").textContent = host(it.url) + " \u2197";
+        grid.appendChild(a);
+      });
+      sec.appendChild(grid);
+      panel.appendChild(sec);
+    });
+  }
+  buildLinks();
 
   function setSection(id){
     const sec = SECTIONS.filter(function(x){ return x.id === id; })[0] || SECTIONS[0];
     activeSection = sec.id;
+    const view = sec.view || (sec.ready ? "faq" : "wip");
 
-    $("#searchwrap").hidden = !sec.ready;
-    $("#shell").hidden      = !sec.ready;
-    $("#wip").hidden        =  sec.ready;
-    $("#notice").hidden     = $("#notice").hidden || !sec.ready;
+    $("#searchwrap").hidden  = view !== "faq";
+    $("#shell").hidden       = view !== "faq";
+    $("#linksPanel").hidden  = view !== "links";
+    $("#wip").hidden         = view !== "wip";
+    if(view !== "faq") $("#notice").hidden = true;
 
-    $("#eyebrow").textContent   = sec.ready ? SITE.eyebrow : "Coming soon";
-    $("#heroTitle").textContent = sec.ready ? SITE.title   : sec.label;
-    $("#heroLede").textContent  = sec.ready ? SITE.lede    : (sec.blurb || "");
-    document.title = sec.ready ? SITE.name : sec.label + " \u00b7 " + SITE.name;
+    $("#eyebrow").textContent   = sec.eyebrow || (sec.ready ? SITE.eyebrow : "Coming soon");
+    $("#heroTitle").textContent = sec.title   || (sec.ready ? SITE.title   : sec.label);
+    $("#heroLede").textContent  = sec.lede    || sec.blurb || (sec.ready ? SITE.lede : "");
+    document.title = sec.id === "faq" ? SITE.name : sec.label + " \u00b7 " + SITE.name;
 
     navEl.querySelectorAll(".navitem").forEach(function(b){
       b.setAttribute("aria-current", String(b.dataset.id === sec.id));
     });
     window.scrollTo({ top:0, behavior:"smooth" });
   }
-
-  function openDrawer(){
-    drawerEl.classList.add("open"); scrimEl.classList.add("open");
-    menuBtn.setAttribute("aria-expanded","true");
-    const first = navEl.querySelector(".navitem");
-    if(first) first.focus();
-  }
-  function closeDrawer(){
-    drawerEl.classList.remove("open"); scrimEl.classList.remove("open");
-    menuBtn.setAttribute("aria-expanded","false");
-    menuBtn.focus();
-  }
-  const drawerIsOpen = function(){ return drawerEl.classList.contains("open"); };
-
-  menuBtn.addEventListener("click", function(){ drawerIsOpen() ? closeDrawer() : openDrawer(); });
-  $("#drawerClose").addEventListener("click", closeDrawer);
-  scrimEl.addEventListener("click", closeDrawer);
 
   setSection("faq");
 
@@ -1250,14 +1303,11 @@ const FALLBACK = [
   });
 
   document.addEventListener("keydown", function(e){
-    if(e.key === "/" && activeSection === "faq" && !drawerIsOpen() &&
+    if(e.key === "/" && activeSection === "faq" &&
        !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)){
       e.preventDefault(); qEl.focus(); qEl.select();
     }
-    if(e.key === "Escape"){
-      if(drawerIsOpen()){ closeDrawer(); return; }
-      if(document.activeElement === qEl){ qEl.value=""; render(); }
-    }
+    if(e.key === "Escape" && document.activeElement === qEl){ qEl.value=""; render(); }
   });
   if(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches){
     document.documentElement.dataset.theme = "dark";
