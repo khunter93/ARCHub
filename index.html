@@ -3,6 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Runs before the page paints, so a dark-mode user never sees a white flash.
+   A saved choice wins; otherwise follow the operating system. */
+(function(){
+  var t = null;
+  try { t = localStorage.getItem("arc-handbook-theme"); } catch(e) {}
+  if(t !== "light" && t !== "dark"){
+    t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+  }
+  document.documentElement.dataset.theme = t;
+})();
+</script>
 <title>ARC Employee Handbook</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1413,12 +1425,35 @@ const FALLBACK = [
     await load();
     b.classList.remove("spin"); b.disabled = false;
   });
-  $("#themeBtn").addEventListener("click", function(){
+  function syncThemeButton(){
     const dark = document.documentElement.dataset.theme === "dark";
-    document.documentElement.dataset.theme = dark ? "light" : "dark";
-    $("#themeLabel").textContent = dark ? "Dark" : "Light";
-    $("#themeIcon").textContent  = dark ? "\u25D0" : "\u25D1";
+    /* the button names what it will switch you to */
+    $("#themeLabel").textContent = dark ? "Light" : "Dark";
+    $("#themeIcon").textContent  = dark ? "\u25D1" : "\u25D0";
+  }
+  syncThemeButton();
+
+  $("#themeBtn").addEventListener("click", function(){
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("arc-handbook-theme", next); } catch(e) {}
+    syncThemeButton();
   });
+
+  /* Keep following the operating system, but only until someone chooses for
+     themselves. After that their choice sticks. */
+  if(window.matchMedia){
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onSystemChange = function(e){
+      let saved = null;
+      try { saved = localStorage.getItem("arc-handbook-theme"); } catch(err) {}
+      if(saved === "light" || saved === "dark") return;
+      document.documentElement.dataset.theme = e.matches ? "dark" : "light";
+      syncThemeButton();
+    };
+    if(mq.addEventListener) mq.addEventListener("change", onSystemChange);
+    else if(mq.addListener) mq.addListener(onSystemChange);
+  }
   document.addEventListener("click", function(e){
     const btn = e.target.closest ? e.target.closest(".video-play") : null;
     if(!btn) return;
@@ -1434,11 +1469,6 @@ const FALLBACK = [
     }
     if(e.key === "Escape" && document.activeElement === qEl){ qEl.value=""; render(); }
   });
-  if(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches){
-    document.documentElement.dataset.theme = "dark";
-    $("#themeLabel").textContent = "Light"; $("#themeIcon").textContent = "\u25D1";
-  }
-
   load();
 })();
 </script>
