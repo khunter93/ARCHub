@@ -16,6 +16,7 @@
 })();
 </script>
 <title>ARC Employee Handbook</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iI2ZmZmZmZiIgZD0iTTgwLjg1ODYgODcuOTA0NUM4MC43ODY1IDg3LjkwNjggODAuNzE0NCA4Ny45MDY4IDgwLjY0MjMgODcuOTA0NUgzNi4wMDY3TDMxLjE3NTYgOTYuMzAyNkMzMC4wMzU3IDk4LjI3OTIgMjcuMzE2IDk4LjU5MDIgMjUuNzY2MiA5Ni45MTQ2QzIzLjc5NjQgOTQuNzg3NSAyMi4wNDY2IDkyLjUwOTkgMjAuNTI2OCA5MC4xMDE4QzE5Ljg0NjggODkuMDM4MyAxOS44MjY4IDg3LjY4MzcgMjAuNDU2OCA4Ni41OTAxTDI2LjgwNjkgNzUuNTQ5NUMyNi44NDI0IDc1LjQ4MjcgMjYuODgwMSA3NS40MTcxIDI2LjkyIDc1LjM1MjlMNDkuMjQwOCAzNi41NDQ4TDQ0LjQxNDIgMjguMTU0NEM0My4yODQzIDI2LjE3NzggNDQuMzc0MiAyMy42NTkzIDQ2LjU5MzkgMjMuMTQ3NkM0OS40MTM2IDIyLjUwNTUgNTIuMjUzMyAyMi4xMjQyIDU1LjA5MyAyMi4wMDM4QzU2LjM0MjggMjEuOTQzNiA1Ny41MjI3IDIyLjYwNTggNTguMTUyNiAyMy42OTk1TDg2LjkzODEgNzMuNzQ3MUg5Ni42MDg0Qzk4Ljg4ODIgNzMuNzQ3MSAxMDAuNTE4IDc1Ljk2NDUgOTkuODQ4MSA3OC4xNDE4Qzk4Ljk4ODIgODAuOTExMSA5Ny44OTgzIDgzLjU3IDk2LjU3ODQgODYuMDk4NEM5NS45OTg1IDg3LjIxMjIgOTQuODM4NiA4Ny45MDQ1IDkzLjU3ODggODcuOTA0NUg4MC44NTg2Wk01Ny4zOTYzIDUwLjcyMTlMNDQuMTUwOSA3My43NDcxSDcwLjY0MThMNTcuMzk2MyA1MC43MjE5WiIvPjwvc3ZnPg==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -370,6 +371,360 @@ mark{background:var(--amber);color:var(--amber-deep);border-radius:3px;padding:0
 }
 .linkcard:hover .linkcard-host{color:var(--accent-ink)}
 
+/* shows & sales leaderboard */
+.periodwrap{display:flex;justify-content:center;margin-bottom:26px}
+.periodtoggle{
+  position:relative;display:inline-flex;gap:3px;padding:3px;
+  background:var(--card);border:1px solid var(--line);border-radius:24px;
+}
+.periodslide{
+  position:absolute;left:3px;top:3px;bottom:3px;width:0;
+  border-radius:20px;background:var(--accent);z-index:0;
+  transition:transform .34s cubic-bezier(.65,.05,.36,1),
+             width .34s cubic-bezier(.65,.05,.36,1);
+}
+.periodtoggle.noanim .periodslide{transition:none}
+.periodtoggle button{
+  position:relative;z-index:1;
+  border:0;background:transparent;cursor:pointer;color:var(--slate);
+  border-radius:20px;padding:8px 20px;
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;
+  transition:color .22s ease;
+}
+.periodtoggle button:hover{color:var(--ink)}
+.periodtoggle button[aria-pressed="true"]{color:#fff;font-weight:700}
+[data-theme="dark"] .periodtoggle button[aria-pressed="true"]{color:#0C1116}
+
+.shows{max-width:var(--maxw);margin:0 auto;padding:0 24px 96px}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:30px}
+.stat{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px 18px;
+}
+.stat-label{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--slate-2);display:block;margin-bottom:7px;
+}
+.stat-value{
+  font-family:var(--display);font-weight:700;font-size:26px;
+  letter-spacing:-.03em;line-height:1;display:block;
+}
+.stat-sub{display:block;margin-top:6px;font-size:12.5px;color:var(--slate)}
+
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:38px}
+.pod{
+  position:relative;overflow:hidden;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:22px 22px 20px;
+}
+.pod::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--medal)}
+.pod-1{--medal:#D4A017}
+.pod-2{--medal:#9AA5B1}
+.pod-3{--medal:#B07C4F}
+.pod-rank{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--medal);display:block;margin-bottom:10px;
+}
+.pod-name{
+  font-family:var(--display);font-weight:700;font-size:19px;
+  letter-spacing:-.02em;line-height:1.2;margin:0 0 12px;
+}
+.pod-stats{display:flex;gap:20px}
+.pod-stat span{display:block}
+.pod-num{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.02em}
+.pod-cap{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-2);margin-top:3px}
+
+.boardhead{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin-bottom:14px;flex-wrap:wrap;
+}
+.boardhead h2{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.018em;margin:0}
+#agentFilter{
+  height:38px;padding:0 14px;min-width:210px;
+  border:1px solid var(--line);border-radius:9px;
+  background:var(--card);color:var(--ink);font-family:var(--body);font-size:14px;
+  outline:0;transition:border-color .16s,box-shadow .16s;
+}
+#agentFilter:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+
+.boardwrap{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  overflow-x:auto;
+}
+.board{width:100%;border-collapse:collapse;font-size:14.5px}
+.board th{
+  text-align:left;white-space:nowrap;cursor:pointer;user-select:none;
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--slate-2);
+  padding:14px 16px;border-bottom:1px solid var(--line);
+  transition:color .14s;
+}
+.board th:hover{color:var(--ink)}
+.board th[aria-sort]{color:var(--accent-ink)}
+.board th .arrow{opacity:0;margin-left:5px}
+.board th[aria-sort] .arrow{opacity:1}
+.board td{padding:12px 16px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+.board tr:last-child td{border-bottom:0}
+.board tbody tr{transition:background .12s}
+.board tbody tr:hover{background:var(--line-soft)}
+.board tbody tr.me{background:var(--accent-soft)}
+
+.b-rank{font-family:var(--mono);font-size:12px;color:var(--slate-2);width:52px;font-variant-numeric:tabular-nums}
+.b-name{font-weight:600;letter-spacing:-.006em;min-width:180px}
+.b-num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.b-bonus{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.b-bar{width:150px}
+.bar{height:7px;border-radius:20px;background:var(--line-soft);overflow:hidden}
+.bar span{display:block;height:100%;border-radius:20px;background:var(--accent);opacity:.85}
+
+.tier{
+  display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;border-radius:20px;padding:3px 9px;
+  border:1px solid var(--edge);background:var(--tint);color:var(--hue);
+}
+.tier-1{--tint:#E9EDF0;--hue:#45555F;--edge:#CDD6DC}
+.tier-2{--tint:#E1F0EA;--hue:#1F6B54;--edge:#BFDDD1}
+.tier-3{--tint:#FAEEDE;--hue:#8B5A1C;--edge:#EBD5B8}
+[data-theme="dark"] .tier-1{--tint:#1B242A;--hue:#A6B6C0;--edge:#2B3841}
+[data-theme="dark"] .tier-2{--tint:#12302A;--hue:#74CFB4;--edge:#1E4A3F}
+[data-theme="dark"] .tier-3{--tint:#33260F;--hue:#E0B472;--edge:#4A3818}
+.tier-none{color:var(--slate-2);font-family:var(--mono);font-size:11px}
+
+.boardnote{
+  margin:14px 2px 0;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.05em;color:var(--slate-2);
+}
+
+/* admin gate */
+.admin{max-width:var(--maxw);margin:0 auto;padding:0 24px 96px}
+.gate{
+  max-width:400px;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--r);
+  padding:34px 32px;box-shadow:var(--shadow);
+}
+.gate-icon{
+  width:44px;height:44px;border-radius:11px;margin-bottom:18px;
+  background:var(--accent-soft);color:var(--accent-ink);
+  display:grid;place-items:center;
+}
+.gate h2{
+  font-family:var(--display);font-weight:700;font-size:19px;
+  letter-spacing:-.02em;margin:0 0 7px;
+}
+.gate p{margin:0 0 20px;font-size:14.5px;color:var(--slate);line-height:1.55}
+.gate-row{display:flex;gap:8px}
+.gate input{
+  flex:1;min-width:0;height:40px;padding:0 14px;
+  border:1.5px solid var(--line);border-radius:9px;background:var(--paper);
+  font-family:var(--body);font-size:15px;color:var(--ink);outline:0;
+}
+.gate input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.gate button{
+  height:40px;padding:0 18px;border-radius:9px;border:0;cursor:pointer;
+  background:var(--accent);color:#fff;
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;
+}
+[data-theme="dark"] .gate button{color:#0C1116}
+.gate-err{
+  margin:14px 0 0;font-size:13.5px;color:var(--warn);
+  min-height:19px;
+}
+.gate.shake{animation:shake .34s}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  22%{transform:translateX(-7px)}
+  55%{transform:translateX(6px)}
+  80%{transform:translateX(-3px)}
+}
+.adminbar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding-bottom:18px;margin-bottom:26px;border-bottom:1px solid var(--line);
+}
+.adminbar .spacer{flex:1}
+.navitem .locktag{
+  flex:none;color:var(--slate-2);display:grid;place-items:center;
+}
+.navitem[aria-current="true"] .locktag{color:var(--hue,var(--accent))}
+
+/* script reader: one continuous thread of dialogue */
+.reader{max-width:var(--maxw);margin:0 auto;padding:0 24px 96px}
+/* cap the reading measure without re-centring, so the script lines up with
+   the page title instead of floating right of it */
+.reader > *{max-width:930px}
+.readerbar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding-bottom:18px;margin-bottom:30px;border-bottom:1px solid var(--line);
+}
+.backbtn{
+  border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  border-radius:9px;height:34px;padding:0 13px;cursor:pointer;
+  font-family:var(--mono);font-size:11px;letter-spacing:.05em;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:border-color .15s,color .15s;
+}
+.backbtn:hover{border-color:var(--slate-2);color:var(--ink)}
+.readerbar .spacer{flex:1}
+.readermeta{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+  color:var(--slate-2);text-transform:uppercase;
+}
+
+/* the thread */
+.flow{
+  position:relative;
+  display:flex;flex-direction:column;gap:19px;
+}
+.flow::before{
+  content:"";position:absolute;left:-30px;top:5px;bottom:5px;
+  width:2px;border-radius:2px;background:var(--line);
+}
+.say{
+  margin:0;max-width:71ch;
+  font-family:var(--body);font-weight:400;
+  font-size:16.5px;line-height:1.68;letter-spacing:-.002em;
+  color:var(--ink);
+}
+.say strong{
+  font-weight:600;color:var(--accent-ink);
+  border-bottom:1.5px solid var(--accent-soft);
+}
+.slot{
+  font-family:var(--mono);font-size:.79em;font-weight:500;
+  color:var(--accent-ink);background:var(--accent-soft);
+  border-radius:5px;padding:2px 7px;white-space:nowrap;
+  letter-spacing:0;
+}
+
+/* your own instructions, clearly not spoken */
+.aside{
+  margin:0;max-width:65ch;
+  font-family:var(--body);font-weight:400;
+  font-size:13.5px;line-height:1.6;color:var(--slate-2);
+  letter-spacing:0;
+}
+.asidetag{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--slate-2);
+  border:1px solid var(--line);border-radius:20px;padding:2px 7px;
+  margin-right:10px;vertical-align:1px;
+}
+.fork .aside{font-size:13px}
+
+/* a node on the thread */
+.flow > .sec-h:first-child{margin-top:0}
+.sec-h{
+  /* sits closer to the lines it introduces than to the stage above it */
+  position:relative;margin:2px 0 -8px;
+  font-family:var(--mono);font-size:10.5px;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+}
+.sec-h::before{
+  content:"";position:absolute;left:-33px;top:.15em;
+  width:9px;height:9px;border-radius:50%;
+  background:var(--accent);box-shadow:0 0 0 4px var(--paper);
+}
+
+/* the thread forking */
+.fork{
+  position:relative;margin-left:1px;
+  border-left:2px solid var(--edge,var(--line));
+  padding-left:24px;
+}
+/* a fork is a change of direction, so give it room after the question;
+   sibling forks stay closer together because they belong to each other */
+.flow > .fork{margin-top:16px}
+.fork + .fork{margin-top:2px}
+.fork::before{
+  content:"";position:absolute;left:-30px;top:8px;
+  width:30px;height:2px;background:var(--edge,var(--line));
+}
+.fork-tag{
+  display:block;margin-bottom:13px;
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--hue,var(--slate-2));
+}
+.fork .flow{gap:15px}
+.fork .flow::before{display:none}
+.fork .say{font-size:16px;line-height:1.62}
+
+/* clinchers */
+.clinchhead{
+  font-family:var(--display);font-weight:700;font-size:23px;
+  letter-spacing:-.024em;margin:52px 0 6px;
+}
+.clinchsub{margin:0 0 20px;color:var(--slate);font-size:15px}
+.clinch{border-bottom:1px solid var(--line);}
+.clinch:first-of-type{border-top:1px solid var(--line)}
+.clinch-q{
+  width:100%;display:flex;align-items:baseline;gap:12px;
+  border:0;background:transparent;cursor:pointer;text-align:left;
+  padding:19px 4px;color:var(--slate);font-family:var(--body);
+  font-size:16.5px;font-weight:500;letter-spacing:-.006em;
+  transition:color .15s;
+}
+.clinch-q:hover{color:var(--ink)}
+.clinch.open .clinch-q{color:var(--ink);font-weight:600}
+.clinch-q .qm{
+  font-family:var(--display);font-size:22px;font-weight:800;
+  color:var(--line);flex:none;line-height:1;font-style:normal;
+}
+.clinch.open .clinch-q .qm{color:var(--accent)}
+.clinch-q span.t{flex:1}
+.clinch-a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .26s ease}
+.clinch.open .clinch-a{grid-template-rows:1fr}
+.clinch-a > div{overflow:hidden}
+.clinch-a .flow{margin:2px 0 26px 30px}
+
+.readercredit{
+  margin-top:44px;padding-top:18px;border-top:1px solid var(--line-soft);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--slate-2);
+}
+
+@media (max-width:900px){
+  .flow::before,.fork::before,.sec-h::before{display:none}
+  .clinch-a .flow{margin-left:0}
+}
+
+@media print{
+  .reader{max-width:none;padding:0}
+  .readerbar,.clinch-q .qm{display:none}
+  .clinch-a{grid-template-rows:1fr}
+  .say,.fork,.aside{break-inside:avoid}
+}
+
+/* scripts: grouped, two up, denser than guides */
+.scripts{max-width:var(--maxw);margin:0 auto;padding:0 24px 96px}
+.scriptgroup{margin-bottom:34px}
+.scriptgroup h2{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--slate-2);margin:0 0 14px;
+  padding-bottom:10px;border-bottom:1px solid var(--line);
+}
+.scriptgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.scriptcard{
+  width:100%;text-align:left;font-family:var(--body);
+  display:flex;align-items:center;gap:15px;cursor:pointer;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:17px 19px;text-decoration:none;color:var(--ink);
+  transition:border-color .16s, box-shadow .16s;
+}
+.scriptcard:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.scripticon{
+  width:38px;height:38px;border-radius:10px;flex:none;
+  background:var(--accent-soft);color:var(--accent-ink);
+  display:grid;place-items:center;
+}
+.scriptbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.scriptname{
+  font-size:15.5px;font-weight:600;letter-spacing:-.008em;line-height:1.3;
+}
+.scriptnote{font-size:13px;color:var(--slate);line-height:1.4}
+.scriptgo{color:var(--slate-2);flex:none;transition:transform .16s,color .16s}
+.scriptcard:hover .scriptgo{transform:translateX(3px);color:var(--accent)}
+
 /* guides: document cards, roomier and single column */
 .guides{max-width:var(--maxw);margin:0 auto;padding:0 24px 96px}
 .guidelist{display:flex;flex-direction:column;gap:12px;max-width:700px}
@@ -510,7 +865,11 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
   .cat{width:auto;padding:7px 13px;border:1px solid var(--line);border-radius:20px;font-size:13.5px}
   .cat[aria-pressed="true"]{box-shadow:none;border-color:var(--edge,var(--accent))}
   .hero{padding:36px 20px 24px}
-  .shell,.notice,.wip,.links,.guides{padding-left:20px;padding-right:20px}
+  .shell,.notice,.wip,.links,.guides,.shows,.scripts,.reader,.admin{padding-left:20px;padding-right:20px}
+  .scriptgrid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .podium{grid-template-columns:1fr}
+  .b-bar,.b-close{display:none}
   .linkgrid{grid-template-columns:1fr}
   .a-body,.a-foot{padding-left:20px}
   .q .tag{display:none}
@@ -520,7 +879,7 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
   *{transition-duration:.01ms !important;animation-duration:.01ms !important}
 }
 @media print{
-  .sidebar,.searchwrap,.rail,.listhead,.a-foot,.toast,.foot,.notice{display:none}
+  .sidebar,.searchwrap,.rail,.listhead,.a-foot,.toast,.foot,.notice,.boardhead{display:none}
   body{padding-left:0}
   .a{grid-template-rows:1fr}
   .item{break-inside:avoid;border-color:#ccc}
@@ -588,6 +947,35 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
 </main>
 
 <section class="links" id="linksPanel" hidden></section>
+
+<section class="shows" id="showsPanel" hidden>
+  <div class="periodwrap">
+    <div class="periodtoggle noanim" id="periodToggle" role="group" aria-label="Reporting period">
+      <span class="periodslide" id="periodSlide" aria-hidden="true"></span>
+      <button type="button" data-period="month" aria-pressed="true">This month</button>
+      <button type="button" data-period="ytd" aria-pressed="false">Year to date</button>
+    </div>
+  </div>
+  <div class="stats" id="statTiles"></div>
+  <div class="podium" id="podium"></div>
+  <div class="boardhead">
+    <h2>Every agent</h2>
+    <input id="agentFilter" type="search" placeholder="Find an agent..." autocomplete="off" aria-label="Find an agent">
+  </div>
+  <div class="boardwrap">
+    <table class="board">
+      <thead><tr id="boardHead"></tr></thead>
+      <tbody id="boardBody"></tbody>
+    </table>
+  </div>
+  <p class="boardnote" id="boardNote"></p>
+</section>
+
+<section class="scripts" id="scriptsPanel" hidden></section>
+
+<section class="reader" id="readerPanel" hidden></section>
+
+<section class="admin" id="adminPanel" hidden></section>
 
 <section class="guides" id="guidesPanel" hidden><div class="guidelist" id="guideList"></div></section>
 
@@ -714,6 +1102,217 @@ const GUIDES = [
 ];
 
 /* ==========================================================================
+   2d-2. SHOWS & SALES
+
+   SAMPLE DATA, here so the layout can be designed. Replace with the live
+   sheet later. Tiers follow the commission FAQ: 10+ units sold is Tier 3,
+   6+ is Tier 2, 1-5 is Tier 1.
+   ========================================================================== */
+const PERIODS = {
+  month: {
+    label: "This month",
+    agents: [
+      { name:"Ahmed Amine Balafrej", shows:5,  sales:1,  bonus:35 },
+      { name:"Aida Ayub",            shows:6,  sales:1,  bonus:40 },
+      { name:"Alexandrea Garcia",    shows:0,  sales:0,  bonus:0 },
+      { name:"Caolan Crittall",      shows:44, sales:12, bonus:548 },
+      { name:"Carolyn Keat",         shows:29, sales:8,  bonus:265 },
+      { name:"Chance Ndero",         shows:20, sales:8,  bonus:220 },
+      { name:"Chanel Douglas",       shows:8,  sales:2,  bonus:60 },
+      { name:"Cody Santos",          shows:10, sales:2,  bonus:70 },
+      { name:"Darcy Lee Boots",      shows:1,  sales:1,  bonus:15 },
+      { name:"Dawn Larocque",        shows:1,  sales:0,  bonus:5 },
+      { name:"Ellen Hopcraft",       shows:4,  sales:2,  bonus:40 },
+      { name:"Heather Seward",       shows:11, sales:4,  bonus:95 },
+      { name:"Ines Cimpaye",         shows:6,  sales:2,  bonus:50 },
+      { name:"Kimberly Dunstan",     shows:14, sales:3,  bonus:100 },
+      { name:"Monique James",        shows:7,  sales:2,  bonus:55 },
+      { name:"Peter Zenner",         shows:3,  sales:0,  bonus:15 },
+      { name:"Rachel Pawluk",        shows:95, sales:25, bonus:1165 },
+      { name:"Ramona McLean",        shows:20, sales:6,  bonus:190 },
+      { name:"Ranjita Singh",        shows:1,  sales:1,  bonus:15 },
+      { name:"Ryanna Johnson",       shows:7,  sales:4,  bonus:75 },
+      { name:"Samantha Shan Jiang",  shows:11, sales:3,  bonus:85 },
+      { name:"Satvir Gill",          shows:12, sales:7,  bonus:165 },
+      { name:"Savina Bajwa",         shows:38, sales:7,  bonus:295 },
+      { name:"Sean Zegers",          shows:2,  sales:1,  bonus:20 },
+      { name:"Sharon Todd",          shows:49, sales:10, bonus:543 },
+      { name:"Susie Starchuk",       shows:13, sales:5,  bonus:115 },
+      { name:"William Shami",        shows:6,  sales:1,  bonus:40 },
+      { name:"Wilson Matthews",      shows:21, sales:6,  bonus:195 }
+    ]
+  },
+  ytd: {
+    label: "Year to date",
+    agents: [
+      { name:"Ahmed Amine Balafrej", shows:10,  sales:3,   bonus:80 },
+      { name:"Aida Ayub",            shows:45,  sales:5,   bonus:275 },
+      { name:"Alexandrea Garcia",    shows:0,   sales:0,   bonus:0 },
+      { name:"Caolan Crittall",      shows:244, sales:73,  bonus:3168 },
+      { name:"Carolyn Keat",         shows:365, sales:78,  bonus:3813 },
+      { name:"Chance Ndero",         shows:118, sales:30,  bonus:1035 },
+      { name:"Chanel Douglas",       shows:100, sales:27,  bonus:810 },
+      { name:"Cody Santos",          shows:113, sales:34,  bonus:1172 },
+      { name:"Darcy Lee Boots",      shows:39,  sales:14,  bonus:365 },
+      { name:"Dawn Larocque",        shows:40,  sales:12,  bonus:320 },
+      { name:"Debbie Kingshott",     shows:96,  sales:30,  bonus:1035 },
+      { name:"Derek Dawkins",        shows:94,  sales:22,  bonus:765 },
+      { name:"Ellen Hopcraft",       shows:107, sales:27,  bonus:875 },
+      { name:"Heather Seward",       shows:77,  sales:21,  bonus:630 },
+      { name:"Ines Cimpaye",         shows:102, sales:27,  bonus:890 },
+      { name:"Kimberly Dunstan",     shows:164, sales:37,  bonus:1594 },
+      { name:"Maria Melger",         shows:77,  sales:25,  bonus:854 },
+      { name:"Meaghan Franchi",      shows:20,  sales:6,   bonus:160 },
+      { name:"Monique James",        shows:335, sales:80,  bonus:3773 },
+      { name:"Peter Zenner",         shows:118, sales:29,  bonus:1252 },
+      { name:"Rachel Pawluk",        shows:647, sales:172, bonus:7969 },
+      { name:"Ramona McLean",        shows:212, sales:60,  bonus:2443 },
+      { name:"Ranjita Singh",        shows:20,  sales:2,   bonus:120 },
+      { name:"Rosa Lilian Rodriguez Borjas", shows:32, sales:10, bonus:260 },
+      { name:"Ryanna Johnson",       shows:217, sales:56,  bonus:2406 },
+      { name:"Samantha Shan Jiang",  shows:142, sales:39,  bonus:1407 },
+      { name:"Satvir Gill",          shows:64,  sales:25,  bonus:640 },
+      { name:"Savina Bajwa",         shows:395, sales:84,  bonus:4218 },
+      { name:"Sean Zegers",          shows:76,  sales:13,  bonus:510 },
+      { name:"Sharon Todd",          shows:595, sales:148, bonus:7125 },
+      { name:"Stephenie Anne Vokey", shows:54,  sales:8,   bonus:350 },
+      { name:"Susie Starchuk",       shows:175, sales:55,  bonus:2014 },
+      { name:"William Shami",        shows:72,  sales:12,  bonus:480 },
+      { name:"Wilson Matthews",      shows:156, sales:44,  bonus:1732 }
+    ]
+  }
+};
+
+/* ==========================================================================
+   2d-4. BUILT IN SCRIPTS
+
+   Each block is one of:
+     { line:"..." }              something you say out loud
+     { note:"..." }              guidance for you, never read aloud
+     { branch:"condition", blocks:[ ... ] }   a fork in the call
+
+   In any line, [square brackets] become fill in slots and **double stars**
+   become the emphasised technique phrases.
+   ========================================================================== */
+const SCRIPT_TEXT = {
+  "main-event": {
+    title:    "Main event call",
+    subtitle: "Stellantis ARC event",
+    version:  "v2.0, in use since August 2024",
+    credit:   "Godin IWT, August 2024",
+    blocks: [
+      { heading:"Introduction" },
+      { line:"Hi, is this [customer name]?" },
+      { line:"This is [your name] calling for [dealership]. I'm calling as a **courtesy to you**, to let you know we have a big VIP event on [event date], and you're on the list." },
+
+      { heading:"Their vehicle" },
+      { line:"Are you still driving your [vehicle]?" },
+      { branch:"They still have it", blocks:[
+        { line:"What's the mileage on it?" }
+      ]},
+      { branch:"They don't have it anymore", blocks:[
+        { line:"What are you driving now? Oh great, what's the mileage on it?" }
+      ]},
+
+      { heading:"Gauging interest" },
+      { line:"That's great. Are you enjoying it?" },
+      { line:"If you had to rate your vehicle from 1 to 10, with ten being absolutely perfect, what would you rate it?" },
+
+      { branch:"They rate it 9 or lower", blocks:[
+        { line:"What would make it a 10?" },
+        { note:"Listen for something you can act on, like more space, more power, or a smaller vehicle." },
+        { line:"If we could get you into a new vehicle with [what they asked for] at a similar cost of ownership, would that be of interest to you?" },
+        { note:"If they say yes, go to Booking the appointment." }
+      ]},
+      { branch:"They rate it a 10", blocks:[
+        { line:"I'm glad you're enjoying it. If you'd like a no obligation options review, you're welcome to come by. The event runs until [event end date]. Thanks for your time, and have a great day." },
+        { note:"End of call." }
+      ]},
+
+      { heading:"Booking the appointment" },
+      { line:"I'd like to invite you in for a no obligation options review. The whole thing takes 35 to 40 minutes, and the event runs [event days]." },
+      { line:"What works better for you, morning or afternoon?" },
+      { line:"How does [day] at [time] sound?" },
+      { branch:"That time doesn't work", blocks:[
+        { line:"No problem, you know your schedule better than I do. What time works **best for you**?" }
+      ]},
+
+      { heading:"Confirming the details" },
+      { line:"When you come in on [day] at [time], ask for [host]. He's hosting the sale and will be in the showroom at a table. He'll be expecting you, and he'll get you started so you're not left waiting. Sounds good? Great, we'll see you then." },
+
+      { note:"Before you close the record, log the rating they gave their vehicle. If it was under 10, log what they said would make it a 10." }
+    ],
+    clinchers: [
+      { objection:"I'm not in the market right now", blocks:[
+        { line:"If you had to rate your vehicle from 1 to 10, with ten being absolutely perfect, what would you rate it?" },
+        { branch:"They rate it 9 or lower", blocks:[
+          { line:"What would make it a 10?" },
+          { note:"Listen for something you can act on, like more space, more power, or a smaller vehicle." },
+          { line:"If we could get you into a new vehicle with [what they asked for] at a similar cost of ownership, would that be of interest to you?" }
+        ]},
+        { branch:"They rate it a 10", blocks:[
+          { line:"I'm glad you're enjoying it. If you'd like a no obligation options review, you're welcome to come by. The event runs until [event end date]. Thanks for your time, and have a great day." }
+        ]}
+      ]},
+      { objection:"I still owe on my vehicle", blocks:[
+        { line:"Not a problem, and that's **exactly why** I called. Most people still owe on their car." },
+        { line:"We've invited a few VIP customers like you to come in for an options review before they make their next payment. You'll get payments, trade value, price, everything you need to decide which scenario works **best for you**. It takes 35 to 40 minutes, and at the end of it you can always **say no later**." },
+        { line:"When would be a good time for us to see your vehicle? Is morning or afternoon better?" }
+      ]},
+      { objection:"My car is paid off", blocks:[
+        { line:"That's perfect, and that's **exactly why** I called. The value of your car, plus the tax savings on a trade in, would help you upgrade for less than you'd expect." },
+        { line:"If you'd like to come in for an options review, you can always **say no later**. Is morning or afternoon better for you?" }
+      ]},
+      { objection:"I'm too busy to set a time right now", blocks:[
+        { line:"I understand, and that's **exactly why** I'd like to set a time as a **courtesy to you**. We'd hate for you to find 30 to 40 minutes to drop by, and then not have the person who needs to see your vehicle available." },
+        { line:"We're open until [closing time]. Does that work better for you?" }
+      ]}
+    ]
+  }
+};
+
+/* ==========================================================================
+   2d-3. SCRIPTS
+
+   Grouped by the kind of call. Same shape as GUIDES: label, url, optional note.
+   ========================================================================== */
+const SCRIPTS = [
+  { group: "Event calls", items: [
+    { label:"Main event call", script:"main-event", note:"Stellantis ARC event, v2.0" },
+    { label:"Private Sale", url:"https://docs.google.com/document/d/1qIEPuHLIKa0a9Wb6RuPk6PpsaREbTGiZT-WKfnY7s7w/edit" },
+    { label:"Alternative", url:"https://docs.google.com/document/d/1SUyJ2RlC8HbjB27mtNMiSHBCb2Vbf7TFIla9IAGyWH0/edit" },
+    { label:"VOR events", url:"https://drive.google.com/open?id=1EocwiLn8o5jZ4UegW6av2uw_RKvScrwl" },
+    { label:"RV", url:"https://docs.google.com/document/d/16pZ-4-wh_NgHLN3DtUVwRaXfxlf6pM_URArGRsCWtDI/edit?usp=sharing" }
+  ]},
+  { group: "Lead follow up", items: [
+    { label:"Digital leads", url:"https://drive.google.com/file/d/1BQMJTjgLeQFzHQd2F4AW_1qoNSLaGgft/view?usp=sharing" },
+    { label:"Digital follow up calls", url:"https://docs.google.com/document/d/1-wCg_zJustyA3lezHQNXsrsAPieXgHoZjxtcTBSSqTE/edit?usp=sharing" },
+    { label:"Showroom visit leads", url:"https://docs.google.com/document/d/1bFwAWr2AIeJ4tLPRdHxId_8zSrV_fKJn09BdbhmRPz8/edit?tab=t.0" }
+  ]},
+  { group: "Other call types", items: [
+    { label:"Warranty calls", url:"https://docs.google.com/document/d/1RIxUZm7h5CgzKxJ6o2ejFnYtQZNzJILBPA-Z_ICzQks/edit?tab=t.0" },
+    { label:"Email capture", url:"https://drive.google.com/file/d/1ws2te85TIKHXh4lHShJMM0WlW0hWytlt/view?usp=sharing" }
+  ]}
+];
+
+/* ==========================================================================
+   2d-5. ADMIN ACCESS
+
+   IMPORTANT: this is a curtain, not a lock. Everything on this page is sent
+   to the browser, so anyone who opens the developer tools can get past it.
+   Use it to keep admin content out of the way, never for anything an agent
+   must not read.
+
+   The password is stored scrambled rather than in plain text. To change it,
+   open this page, press F12, and in the Console run:
+
+       arcHash("your new password")
+
+   Paste what it prints in as ADMIN_HASH below.
+   ========================================================================== */
+const ADMIN_HASH = "h15lzo65";
+
+/* ==========================================================================
    2e. MENU SECTIONS
 
    Everything in the sidebar, in order. A section is one of three kinds:
@@ -724,17 +1323,26 @@ const GUIDES = [
 const SECTIONS = [
   { id:"faq",     label:"FAQ", ready:true,
     icon:'<path d="M9.1 9a3 3 0 1 1 4 2.8c-.7.3-1.1 1-1.1 1.7v.5"/><circle cx="12" cy="17.5" r=".6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="9"/>' },
-  { id:"shows",   label:"Shows & Sales", ready:false,
+  { id:"shows",   label:"Shows & Sales", ready:true, view:"shows",
     icon:'<path d="M3 20h18M6 20V11M11 20V5M16 20v-7M21 20v-4"/>',
-    blurb:"Monthly Shows & Sales will be shown here." },
-  { id:"scripts", label:"Scripts", ready:false,
+    eyebrow:"This month",
+    title:"Shows & Sales",
+    lede:"Where everyone stands this month. Sort by any column to see who is leading on volume, on closing, or on bonus earned." },
+  { id:"scripts", label:"Scripts", ready:true, view:"scripts", links:SCRIPTS,
     icon:'<path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v6h6M9 13h7M9 17h5"/>',
-    blurb:"Call scripts, openers and rebuttals will live here." },
+    eyebrow:"What to say",
+    title:"Scripts",
+    lede:"Grouped by the kind of call you are making. Each one opens in a new tab so you can keep this page beside it." },
   { id:"guides",  label:"Guides", ready:true, view:"guides", links:GUIDES,
     icon:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10a2 2 0 0 1 2 2v13a2 2 0 0 0-2-1.6H5.5A1.5 1.5 0 0 1 4 16z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H14a2 2 0 0 0-2 2v13a2 2 0 0 1 2-1.6h4.5a1.5 1.5 0 0 0 1.5-1.4z"/>',
     eyebrow:"Walkthroughs",
     title:"Guides",
     lede:"Step by step documents for the parts of the job that need more than a one paragraph answer." },
+  { id:"admin",   label:"Admin", ready:true, view:"admin",
+    icon:'<rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V7.4a4 4 0 0 1 8 0v3.1"/>',
+    eyebrow:"Restricted",
+    title:"Admin",
+    lede:"Tools and notes for the admin team." },
   { id:"links",   label:"Important links", ready:true, view:"links", links:LINKS,
     icon:'<path d="M10 13.5a4 4 0 0 0 5.7.4l3-3a4 4 0 0 0-5.7-5.7l-1.7 1.7"/><path d="M14 10.5a4 4 0 0 0-5.7-.4l-3 3a4 4 0 0 0 5.7 5.7l1.7-1.7"/>',
     eyebrow:"Quick access",
@@ -1312,6 +1920,7 @@ const FALLBACK = [
     b.innerHTML =
       '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + sec.icon + '</svg>' +
       '<span class="navlabel"></span>' +
+      (sec.view === "admin" ? '<span class="locktag"></span>' : "") +
       (sec.ready ? "" : '<span class="wiptag">WIP</span>');
     b.querySelector(".navlabel").textContent = sec.label;
     b.addEventListener("click", function(){ setSection(sec.id); });
@@ -1381,6 +1990,431 @@ const FALLBACK = [
     });
   }
 
+  /* ---------- shows & sales ---------- */
+  const COLS = [
+    { key:"rank",  label:"#",      sortable:false },
+    { key:"name",  label:"Agent",  sortable:true,  dir:"asc" },
+    { key:"shows", label:"Shows",  sortable:true,  dir:"desc" },
+    { key:"sales", label:"Sales",  sortable:true,  dir:"desc" },
+    { key:"rate",  label:"Close",  sortable:true,  dir:"desc" },
+    { key:"bar",   label:"",       sortable:false },
+    { key:"tier",  label:"Tier",   sortable:false, monthOnly:true },
+    { key:"bonus", label:"Bonus",  sortable:true,  dir:"desc" }
+  ];
+  let sortKey = "sales", sortDir = "desc";
+
+  const money = function(n){ return "$" + n.toLocaleString("en-US"); };
+  const tierOf = function(sales){ return sales >= 10 ? 3 : sales >= 6 ? 2 : sales >= 1 ? 1 : 0; };
+  let period = "month";
+  const rows = function(){
+    return PERIODS[period].agents.map(function(a){
+      return {
+        name:a.name, shows:a.shows, sales:a.sales, bonus:a.bonus,
+        rate: a.shows ? a.sales / a.shows : 0,
+        tier: tierOf(a.sales)
+      };
+    });
+  };
+
+  function buildShows(){
+    const data = rows();
+    const totalShows = data.reduce(function(n,a){ return n + a.shows; }, 0);
+    const totalSales = data.reduce(function(n,a){ return n + a.sales; }, 0);
+    const totalBonus = data.reduce(function(n,a){ return n + a.bonus; }, 0);
+    const active = data.filter(function(a){ return a.shows > 0; }).length;
+
+    /* summary tiles */
+    const tiles = [
+      ["Shows booked", totalShows.toLocaleString("en-US"), active + " agents on the board"],
+      ["Units sold",   totalSales.toLocaleString("en-US"), (totalShows ? Math.round(totalSales/totalShows*100) : 0) + "% team close rate"],
+      ["Bonus earned", money(totalBonus), "paid across the team"],
+      period === "month"
+        ? ["Hitting Tier 3", String(data.filter(function(a){ return a.tier === 3; }).length), "10 or more units sold"]
+        : (function(){
+            const best = data.filter(function(a){ return a.shows >= 20; })
+                             .sort(function(x,y){ return y.rate - x.rate; })[0];
+            return best
+              ? ["Best close rate", Math.round(best.rate*100) + "%", best.name]
+              : ["Best close rate", "\u2013", "not enough volume yet"];
+          })()
+    ];
+    $("#statTiles").innerHTML = tiles.map(function(t){
+      return '<div class="stat"><span class="stat-label">' + t[0] + '</span>' +
+             '<span class="stat-value">' + t[1] + '</span>' +
+             '<span class="stat-sub">' + t[2] + '</span></div>';
+    }).join("");
+
+    /* podium: top three by units sold, bonus breaks the tie */
+    const top = data.slice().sort(function(a,b){ return b.sales - a.sales || b.bonus - a.bonus; }).slice(0,3);
+    const places = ["1st \u00b7 Gold", "2nd \u00b7 Silver", "3rd \u00b7 Bronze"];
+    $("#podium").innerHTML = top.map(function(a,i){
+      return '<div class="pod pod-' + (i+1) + '">' +
+        '<span class="pod-rank">' + places[i] + '</span>' +
+        '<h3 class="pod-name">' + a.name + '</h3>' +
+        '<div class="pod-stats">' +
+          '<div class="pod-stat"><span class="pod-num">' + a.sales + '</span><span class="pod-cap">Sales</span></div>' +
+          '<div class="pod-stat"><span class="pod-num">' + a.shows + '</span><span class="pod-cap">Shows</span></div>' +
+          '<div class="pod-stat"><span class="pod-num">' + money(a.bonus) + '</span><span class="pod-cap">Bonus</span></div>' +
+        '</div></div>';
+    }).join("");
+
+    /* header */
+    const cols = COLS.filter(function(c){ return !c.monthOnly || period === "month"; });
+    $("#boardHead").innerHTML = cols.map(function(c){
+      if(!c.sortable) return '<th>' + c.label + '</th>';
+      const on = sortKey === c.key;
+      return '<th data-key="' + c.key + '" tabindex="0" role="button"' +
+             (on ? ' aria-sort="' + (sortDir === "asc" ? "ascending" : "descending") + '"' : "") +
+             '>' + c.label + '<span class="arrow">' + (on && sortDir === "asc" ? "\u2191" : "\u2193") + '</span></th>';
+    }).join("");
+
+    $("#boardHead").querySelectorAll("th[data-key]").forEach(function(th){
+      const go = function(){
+        const key = th.dataset.key;
+        const col = COLS.filter(function(c){ return c.key === key; })[0];
+        if(sortKey === key) sortDir = sortDir === "asc" ? "desc" : "asc";
+        else { sortKey = key; sortDir = col.dir; }
+        buildShows();
+        applyFilter();
+      };
+      th.addEventListener("click", go);
+      th.addEventListener("keydown", function(e){
+        if(e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); }
+      });
+    });
+
+    /* body */
+    data.sort(function(a,b){
+      let x = a[sortKey], y = b[sortKey];
+      if(sortKey === "name") return sortDir === "asc" ? x.localeCompare(y) : y.localeCompare(x);
+      return sortDir === "asc" ? x - y : y - x;
+    });
+
+    const peak = Math.max.apply(null, data.map(function(a){
+      return sortKey === "name" ? a.sales : (a[sortKey] || 0);
+    }).concat([1]));
+
+    $("#boardBody").innerHTML = data.map(function(a,i){
+      const metric = sortKey === "name" ? a.sales : a[sortKey];
+      const pct = Math.round((metric / peak) * 100);
+      const tierCell = a.tier
+        ? '<span class="tier tier-' + a.tier + '">Tier ' + a.tier + '</span>'
+        : '<span class="tier-none">&mdash;</span>';
+      return '<tr data-name="' + a.name.toLowerCase() + '">' +
+        '<td class="b-rank">' + (i+1) + '</td>' +
+        '<td class="b-name">' + a.name + '</td>' +
+        '<td class="b-num">' + a.shows + '</td>' +
+        '<td class="b-num">' + a.sales + '</td>' +
+        '<td class="b-num">' + (a.shows ? Math.round(a.rate*100) + "%" : "\u2013") + '</td>' +
+        '<td class="b-bar"><div class="bar"><span style="width:' + pct + '%"></span></div></td>' +
+        (period === "month" ? '<td>' + tierCell + '</td>' : "") +
+        '<td class="b-bonus">' + money(a.bonus) + '</td>' +
+      '</tr>';
+    }).join("");
+
+    $("#boardNote").textContent =
+      "Sample data \u00b7 " + PERIODS[period].label.toLowerCase() + " \u00b7 " +
+      data.length + " agents \u00b7 click any column heading to re-sort";
+  }
+
+  function applyFilter(){
+    const q = ($("#agentFilter").value || "").toLowerCase().trim();
+    $("#boardBody").querySelectorAll("tr").forEach(function(tr){
+      const hit = !q || tr.dataset.name.indexOf(q) > -1;
+      tr.hidden = !hit;
+      tr.classList.toggle("me", !!q && hit);
+    });
+  }
+  $("#agentFilter").addEventListener("input", applyFilter);
+
+  function movePeriodPill(){
+    const wrap = $("#periodToggle"), pill = $("#periodSlide");
+    const on = wrap.querySelector('button[aria-pressed="true"]');
+    if(!on || !on.offsetWidth) return;          /* panel still hidden, no layout yet */
+    pill.style.width = on.offsetWidth + "px";
+    pill.style.transform = "translateX(" + (on.offsetLeft - 3) + "px)";
+    if(wrap.classList.contains("noanim")){
+      /* let the first position land without animating in from zero */
+      requestAnimationFrame(function(){ wrap.classList.remove("noanim"); });
+    }
+  }
+
+  $("#periodToggle").querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click", function(){
+      if(period === b.dataset.period) return;
+      period = b.dataset.period;
+      $("#periodToggle").querySelectorAll("button").forEach(function(x){
+        x.setAttribute("aria-pressed", String(x.dataset.period === period));
+      });
+      movePeriodPill();
+      buildShows();
+      applyFilter();
+    });
+  });
+  window.addEventListener("resize", movePeriodPill);
+
+  /* ---------- script reader ---------- */
+  const FORKS = ["cat-1","cat-2","cat-0","cat-3","cat-4","cat-5"];
+
+  function scriptText(t){
+    /* escape, then slots, then the shared **bold** handling */
+    let out = escHTML(String(t || ""));
+    out = out.replace(/\[([^\]]+)\]/g, '<span class="slot">$1</span>');
+    return inline(out);
+  }
+
+  function renderBlocks(blocks, depth){
+    const wrap = document.createElement("div");
+    wrap.className = "flow";
+    let forkN = 0;
+    (blocks || []).forEach(function(b){
+      if(b.heading){
+        const h = document.createElement("div");
+        h.className = "sec-h";
+        h.textContent = b.heading;
+        wrap.appendChild(h);
+        return;
+      }
+      if(b.note){
+        const n = document.createElement("p");
+        n.className = "aside";
+        n.innerHTML = '<span class="asidetag">Note</span>';
+        const t = document.createElement("span");
+        t.innerHTML = scriptText(b.note);
+        n.appendChild(t);
+        wrap.appendChild(n);
+        return;
+      }
+      if(b.branch){
+        const f = document.createElement("div");
+        f.className = "fork " + FORKS[forkN % FORKS.length];
+        forkN++;
+        const tag = document.createElement("span");
+        tag.className = "fork-tag";
+        tag.textContent = b.branch;
+        f.appendChild(tag);
+        f.appendChild(renderBlocks(b.blocks, (depth || 0) + 1));
+        wrap.appendChild(f);
+        return;
+      }
+      const l = document.createElement("p");
+      l.className = "say";
+      l.innerHTML = scriptText(b.line);
+      wrap.appendChild(l);
+    });
+    return wrap;
+  }
+
+  function openScript(id){
+    const sc = SCRIPT_TEXT[id];
+    if(!sc) return;
+    const panel = $("#readerPanel");
+    panel.innerHTML = "";
+
+    const bar = document.createElement("div");
+    bar.className = "readerbar";
+    bar.innerHTML =
+      '<button class="backbtn" type="button" id="readerBack">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H6M11 6l-6 6 6 6"/></svg>' +
+        'All scripts' +
+      '</button>' +
+      '<span class="spacer"></span>' +
+      '<span class="readermeta"></span>' +
+      '<button class="backbtn" type="button" id="readerPrint">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4v-6h16v6h-2"/><path d="M8 14h8v7H8z"/></svg>' +
+        'Save as PDF' +
+      '</button>';
+    bar.querySelector(".readermeta").textContent = sc.version || "";
+    panel.appendChild(bar);
+
+    panel.appendChild(renderBlocks(sc.blocks, 0));
+
+    if(sc.clinchers && sc.clinchers.length){
+      const h = document.createElement("h2");
+      h.className = "clinchhead";
+      h.textContent = "Call clinchers";
+      panel.appendChild(h);
+      const sub = document.createElement("p");
+      sub.className = "clinchsub";
+      sub.textContent = "What to say when they push back. Tap one to open it.";
+      panel.appendChild(sub);
+
+      sc.clinchers.forEach(function(c){
+        const box = document.createElement("div");
+        box.className = "clinch";
+        const btn = document.createElement("button");
+        btn.className = "clinch-q"; btn.type = "button";
+        btn.innerHTML = '<span class="qm">&ldquo;</span><span class="t"></span>';
+        btn.querySelector(".t").textContent = c.objection;
+        const ans = document.createElement("div");
+        ans.className = "clinch-a";
+        const inner = document.createElement("div");
+        inner.appendChild(renderBlocks(c.blocks, 1));
+        ans.appendChild(inner);
+        btn.addEventListener("click", function(){ box.classList.toggle("open"); });
+        box.appendChild(btn); box.appendChild(ans);
+        panel.appendChild(box);
+      });
+    }
+
+    if(sc.credit){
+      const cr = document.createElement("p");
+      cr.className = "readercredit";
+      cr.textContent = sc.credit;
+      panel.appendChild(cr);
+    }
+
+    $("#readerBack").addEventListener("click", function(){ setSection("scripts"); });
+    $("#readerPrint").addEventListener("click", function(){ window.print(); });
+
+    $("#scriptsPanel").hidden = true;
+    $("#readerPanel").hidden  = false;
+    $("#eyebrow").textContent   = sc.subtitle || "Script";
+    $("#heroTitle").textContent = sc.title;
+    $("#heroLede").textContent  = "Follow the line down the page. Dark text is what you say, grey notes are for you only, and the call branches where the thread splits.";
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  function buildScripts(groups){
+    const panel = $("#scriptsPanel");
+    panel.innerHTML = "";
+    (groups || []).forEach(function(g){
+      const sec = document.createElement("section");
+      sec.className = "scriptgroup";
+      const h = document.createElement("h2");
+      h.textContent = g.group;
+      sec.appendChild(h);
+
+      const grid = document.createElement("div");
+      grid.className = "scriptgrid";
+      g.items.forEach(function(it){
+        const built = !!it.script;
+        const a = document.createElement(built ? "button" : "a");
+        a.className = "scriptcard";
+        if(built){ a.type = "button"; a.addEventListener("click", function(){ openScript(it.script); }); }
+        else { a.href = it.url; a.target = "_blank"; a.rel = "noopener"; }
+        a.innerHTML =
+          '<span class="scripticon">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' +
+              '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.3-.6L3 21l1.8-4.6A8.3 8.3 0 0 1 3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/>' +
+              '<path d="M8.5 10h7M8.5 13.5h4.5"/>' +
+            '</svg>' +
+          '</span>' +
+          '<span class="scriptbody">' +
+            '<span class="scriptname"></span>' +
+            (it.note ? '<span class="scriptnote"></span>' : "") +
+          '</span>' +
+          '<svg class="scriptgo" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
+        a.querySelector(".scriptname").textContent = it.label;
+        if(it.note) a.querySelector(".scriptnote").textContent = it.note;
+        grid.appendChild(a);
+      });
+      sec.appendChild(grid);
+      panel.appendChild(sec);
+    });
+  }
+
+  /* ---------- admin gate ---------- */
+  /* Deliberately simple. See the note by ADMIN_HASH: this hides content, it
+     does not protect it. Exposed as window.arcHash so a new password can be
+     generated from the browser console. */
+  function arcHash(pw){
+    let h = 5381;
+    const str = "arc:" + String(pw);
+    for(let i = 0; i < str.length; i++) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0;
+    return "h" + h.toString(36);
+  }
+  window.arcHash = arcHash;
+
+  const ADMIN_KEY = "arc-handbook-admin";
+  const expected = ADMIN_HASH;
+
+  function adminUnlocked(){
+    try { return localStorage.getItem(ADMIN_KEY) === expected; }
+    catch(e){ return adminSession === true; }
+  }
+  let adminSession = false;
+
+  function setAdminUnlocked(on){
+    adminSession = on;
+    try {
+      if(on) localStorage.setItem(ADMIN_KEY, expected);
+      else localStorage.removeItem(ADMIN_KEY);
+    } catch(e) {}
+    markAdminNav();
+  }
+
+  function markAdminNav(){
+    const item = navEl.querySelector('.navitem[data-id="admin"] .locktag');
+    if(!item) return;
+    item.innerHTML = adminUnlocked()
+      ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V7.4a4 4 0 0 1 7.4-2"/></svg>'
+      : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V7.4a4 4 0 0 1 8 0v3.1"/></svg>';
+  }
+
+  function buildAdmin(){
+    const panel = $("#adminPanel");
+    panel.innerHTML = "";
+
+    if(!adminUnlocked()){
+      const gate = document.createElement("div");
+      gate.className = "gate";
+      gate.innerHTML =
+        '<div class="gate-icon">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V7.4a4 4 0 0 1 8 0v3.1"/></svg>' +
+        '</div>' +
+        '<h2>Enter the admin password</h2>' +
+        '<p>You will only need to do this once on this computer.</p>' +
+        '<div class="gate-row">' +
+          '<input id="gatePw" type="password" autocomplete="current-password" aria-label="Admin password" placeholder="Password">' +
+          '<button type="button" id="gateGo">Unlock</button>' +
+        '</div>' +
+        '<p class="gate-err" id="gateErr"></p>';
+      panel.appendChild(gate);
+
+      const tryIt = function(){
+        const val = $("#gatePw").value;
+        if(arcHash(val) === expected){
+          setAdminUnlocked(true);
+          buildAdmin();
+        } else {
+          $("#gateErr").textContent = "That password isn't right.";
+          gate.classList.remove("shake");
+          void gate.offsetWidth;
+          gate.classList.add("shake");
+          $("#gatePw").select();
+        }
+      };
+      $("#gateGo").addEventListener("click", tryIt);
+      $("#gatePw").addEventListener("keydown", function(e){ if(e.key === "Enter") tryIt(); });
+      setTimeout(function(){ $("#gatePw").focus(); }, 60);
+      return;
+    }
+
+    const bar = document.createElement("div");
+    bar.className = "adminbar";
+    bar.innerHTML =
+      '<span class="readermeta">Unlocked on this computer</span>' +
+      '<span class="spacer"></span>' +
+      '<button class="backbtn" type="button" id="adminLock">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V7.4a4 4 0 0 1 8 0v3.1"/></svg>' +
+        'Lock again' +
+      '</button>';
+    panel.appendChild(bar);
+
+    const wip = document.createElement("div");
+    wip.className = "wip-in";
+    wip.innerHTML =
+      '<span class="wip-badge">Work in progress</span>' +
+      '<p>Nothing here yet. Tell me what the admin team needs and this is where it goes.</p>';
+    panel.appendChild(wip);
+
+    $("#adminLock").addEventListener("click", function(){
+      setAdminUnlocked(false);
+      buildAdmin();
+    });
+  }
+
   function setSection(id){
     const sec = SECTIONS.filter(function(x){ return x.id === id; })[0] || SECTIONS[0];
     activeSection = sec.id;
@@ -1389,10 +2423,17 @@ const FALLBACK = [
     $("#searchwrap").hidden  = view !== "faq";
     $("#shell").hidden       = view !== "faq";
     $("#linksPanel").hidden  = view !== "links";
+    $("#showsPanel").hidden   = view !== "shows";
+    $("#scriptsPanel").hidden = view !== "scripts";
+    $("#readerPanel").hidden  = true;
+    $("#adminPanel").hidden   = view !== "admin";
     $("#guidesPanel").hidden = view !== "guides";
     $("#wip").hidden         = view !== "wip";
     if(view === "links")  buildLinks(sec.links);
     if(view === "guides") buildGuides(sec.links);
+    if(view === "admin")   buildAdmin();
+    if(view === "scripts") buildScripts(sec.links);
+    if(view === "shows"){ buildShows(); applyFilter(); movePeriodPill(); }
     if(view !== "faq") $("#notice").hidden = true;
 
     $("#eyebrow").textContent   = sec.eyebrow || (sec.ready ? SITE.eyebrow : "Coming soon");
@@ -1406,6 +2447,7 @@ const FALLBACK = [
     window.scrollTo({ top:0, behavior:"smooth" });
   }
 
+  markAdminNav();
   setSection("faq");
 
   /* ---------- events -------------------------------------------------------- */
