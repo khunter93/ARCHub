@@ -376,7 +376,9 @@ mark{background:var(--amber);color:var(--amber-deep);border-radius:3px;padding:0
 .periodtoggle{
   position:relative;display:inline-flex;gap:3px;padding:3px;
   background:var(--card);border:1px solid var(--line);border-radius:24px;
+  max-width:100%;overflow-x:auto;scrollbar-width:none;
 }
+.periodtoggle::-webkit-scrollbar{display:none}
 .periodslide{
   position:absolute;left:3px;top:3px;bottom:3px;width:0;
   border-radius:20px;background:var(--accent);z-index:0;
@@ -952,8 +954,6 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
   <div class="periodwrap">
     <div class="periodtoggle noanim" id="periodToggle" role="group" aria-label="Reporting period">
       <span class="periodslide" id="periodSlide" aria-hidden="true"></span>
-      <button type="button" data-period="month" aria-pressed="true">This month</button>
-      <button type="button" data-period="ytd" aria-pressed="false">Year to date</button>
     </div>
   </div>
   <div class="stats" id="statTiles"></div>
@@ -1108,7 +1108,35 @@ const GUIDES = [
    sheet later. Tiers follow the commission FAQ: 10+ units sold is Tier 3,
    6+ is Tier 2, 1-5 is Tier 1.
    ========================================================================== */
-const PERIODS = {
+/* Where the numbers come from.
+
+   ONE AND DONE SETUP
+   ------------------
+   1. In the sheet: File > Share > Publish to web
+   2. Left dropdown:  Entire document
+      Right dropdown: Web page
+      Leave "Automatically republish when changes are made" ticked.
+   3. Publish, copy the link (it ends in /pubhtml), paste it below as sheetUrl.
+   4. Set useSheet to true.
+
+   That is the last time you touch this. The page reads every tab through that
+   one link, so when you add September the month button appears on its own.
+   Each tab needs Agent, Shows, Sales and Bonus headers; any tab without them
+   (notes, working, totals) is skipped automatically. Year to date is added up
+   from the months, so it can never disagree with them.
+*/
+const SALES_SOURCE = {
+  useSheet: true,
+  sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbnUtVDickeBF7pPiriXPh___KButfl4fB99twVERizwlY6rdJMbe-j_B1TTGlU2Bp6fitDJpJ0BEv/pubhtml",
+
+  /* Only needed if the above cannot be used, for example when single tabs are
+     published individually instead of the whole document. */
+  csvByMonth: {
+    // "January": ""
+  }
+};
+
+const SAMPLE_PERIODS = {
   month: {
     label: "This month",
     agents: [
@@ -1328,6 +1356,9 @@ const SECTIONS = [
     eyebrow:"This month",
     title:"Shows & Sales",
     lede:"Where everyone stands this month. Sort by any column to see who is leading on volume, on closing, or on bonus earned." },
+  { id:"australia", label:"Australia", ready:false,
+    icon:'<circle cx="12" cy="12" r="9"/><path d="M3.2 9.5h17.6M3.2 14.5h17.6"/><path d="M12 3.1a15 15 0 0 1 0 17.8 15 15 0 0 1 0-17.8z"/>',
+    blurb:"Content for the Australia team will live here." },
   { id:"scripts", label:"Scripts", ready:true, view:"scripts", links:SCRIPTS,
     icon:'<path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v6h6M9 13h7M9 17h5"/>',
     eyebrow:"What to say",
@@ -2005,9 +2036,163 @@ const FALLBACK = [
 
   const money = function(n){ return "$" + n.toLocaleString("en-US"); };
   const tierOf = function(sales){ return sales >= 10 ? 3 : sales >= 6 ? 2 : sales >= 1 ? 1 : 0; };
-  let period = "month";
+  const MONTH_ORDER = ["january","february","march","april","may","june",
+                       "july","august","september","october","november","december"];
+
+  let PERIOD_LIST = [
+    { key:"month", label:SAMPLE_PERIODS.month.label, agents:SAMPLE_PERIODS.month.agents, isTotal:false },
+    { key:"ytd",   label:SAMPLE_PERIODS.ytd.label,   agents:SAMPLE_PERIODS.ytd.agents,   isTotal:true  }
+  ];
+  let period = 0, salesReady = false, salesLive = false;
+  const cur = function(){ return PERIOD_LIST[period] || PERIOD_LIST[0]; };
+
+  /* one row per agent per month -> a period per month, plus a summed total */
+  function periodsFromRows(recs){
+    const byMonth = new Map();
+    recs.forEach(function(r){
+      if(!byMonth.has(r.month)) byMonth.set(r.month, new Map());
+      const m = byMonth.get(r.month);
+      const prev = m.get(r.agent) || { name:r.agent, shows:0, sales:0, bonus:0 };
+      prev.shows += r.shows; prev.sales += r.sales; prev.bonus += r.bonus;
+      m.set(r.agent, prev);
+    });
+
+    const names = Array.from(byMonth.keys());
+    names.sort(function(a,b){
+      const x = MONTH_ORDER.indexOf(String(a).trim().toLowerCase().slice(0,20));
+      const y = MONTH_ORDER.indexOf(String(b).trim().toLowerCase().slice(0,20));
+      if(x === -1 && y === -1) return 0;
+      if(x === -1) return 1;
+      if(y === -1) return -1;
+      return x - y;
+    });
+
+    const list = names.map(function(n){
+      return {
+        key: n, label: n, isTotal: false,
+        agents: Array.from(byMonth.get(n).values())
+                     .sort(function(a,b){ return a.name.localeCompare(b.name); })
+      };
+    });
+
+    const totals = new Map();
+    recs.forEach(function(r){
+      const prev = totals.get(r.agent) || { name:r.agent, shows:0, sales:0, bonus:0 };
+      prev.shows += r.shows; prev.sales += r.sales; prev.bonus += r.bonus;
+      totals.set(r.agent, prev);
+    });
+    list.push({
+      key:"ytd", label:"Year to date", isTotal:true,
+      agents: Array.from(totals.values()).sort(function(a,b){ return a.name.localeCompare(b.name); })
+    });
+    return list;
+  }
+
+  const num = function(v){
+    const n = parseFloat(String(v == null ? "" : v).replace(/[^0-9.\-]/g, ""));
+    return isNaN(n) ? 0 : n;
+  };
+
+  async function fetchGrid(url){
+    const sep = url.indexOf("?") > -1 ? "&" : "?";
+    const res = await fetch(url + sep + "cb=" + Date.now());
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    return parseCSV(await res.text()).filter(function(r){
+      return r.some(function(c){ return c.trim(); });
+    });
+  }
+
+  /* header names are matched loosely, so Sales, Total Sales and sales all work */
+  function readGrid(grid, forcedMonth){
+    if(grid.length < 2) throw new Error("no rows under the header");
+    const head = grid[0].map(function(h){ return h.trim().toLowerCase(); });
+    const col = function(n){
+      return head.findIndex(function(h){ return h === n || h.indexOf(n) > -1; });
+    };
+    const iM = col("month"), iA = col("agent"), iSh = col("show"), iSa = col("sale"), iB = col("bonus");
+    if(iA < 0 || iSh < 0 || iSa < 0) throw new Error("need Agent, Shows and Sales columns");
+    if(iM < 0 && !forcedMonth) throw new Error("need a Month column");
+
+    return grid.slice(1)
+      .filter(function(r){ return (r[iA] || "").trim(); })
+      .map(function(r){
+        return {
+          month: forcedMonth || (r[iM] || "").trim(),
+          agent: r[iA].trim(),
+          shows: num(r[iSh]),
+          sales: num(r[iSa]),
+          bonus: iB >= 0 ? num(r[iB]) : 0
+        };
+      })
+      .filter(function(r){ return r.month; });
+  }
+
+  /* The published document is one HTML page holding every tab, so a single
+     link keeps working as tabs are added. */
+  async function tabsFromPublishedDoc(url){
+    const base = url.split("?")[0].replace(/\/(pubhtml|pub)$/, "");
+    const res = await fetch(base + "/pubhtml?cb=" + Date.now());
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+
+    const names = Array.prototype.map.call(
+      doc.querySelectorAll("#sheet-menu li a"),
+      function(a){ return a.textContent.trim(); }
+    );
+    const tables = doc.querySelectorAll("table");
+    if(!tables.length) throw new Error("no tables in the published page");
+
+    const out = [];
+    Array.prototype.forEach.call(tables, function(tbl, i){
+      const grid = Array.prototype.map.call(tbl.querySelectorAll("tr"), function(tr){
+        return Array.prototype.map.call(tr.querySelectorAll("td,th"), function(c){
+          return c.textContent.trim();
+        });
+      });
+      /* published pages carry a row-number gutter and sometimes blank lead rows,
+         so find the header row rather than assuming it is first */
+      const h = grid.findIndex(function(r){
+        return r.some(function(c){ return c.toLowerCase() === "agent"; });
+      });
+      if(h < 0) return;                       /* not a data tab, skip it */
+      out.push({ name: names[i] || ("Sheet " + (i + 1)), grid: grid.slice(h) });
+    });
+    if(!out.length) throw new Error("no tab had an Agent column");
+    return out;
+  }
+
+  async function loadSales(){
+    if(!SALES_SOURCE.useSheet) return false;
+    try{
+      let recs = [];
+
+      if(/^https?:\/\//.test(SALES_SOURCE.sheetUrl || "")){
+        const tabs = await tabsFromPublishedDoc(SALES_SOURCE.sheetUrl);
+        tabs.forEach(function(t){
+          try { recs = recs.concat(readGrid(t.grid, t.name)); }
+          catch(e){ /* tab without the right columns, ignore it */ }
+        });
+      } else {
+        const byMonth = SALES_SOURCE.csvByMonth || {};
+        const keys = Object.keys(byMonth).filter(function(k){ return /^https?:\/\//.test(byMonth[k]); });
+        if(!keys.length) return false;
+        const grids = await Promise.all(keys.map(function(m){ return fetchGrid(byMonth[m]); }));
+        grids.forEach(function(g, i){ recs = recs.concat(readGrid(g, keys[i])); });
+      }
+
+      if(!recs.length) throw new Error("no usable rows");
+      PERIOD_LIST = periodsFromRows(recs);
+      period = Math.max(0, PERIOD_LIST.length - 2);   /* newest month, not the total */
+      salesLive = true;
+      return true;
+    }catch(err){
+      console.warn("Shows & Sales sheet:", err.message);
+      return false;
+    }
+  }
+
   const rows = function(){
-    return PERIODS[period].agents.map(function(a){
+    return cur().agents.map(function(a){
       return {
         name:a.name, shows:a.shows, sales:a.sales, bonus:a.bonus,
         rate: a.shows ? a.sales / a.shows : 0,
@@ -2028,7 +2213,7 @@ const FALLBACK = [
       ["Shows booked", totalShows.toLocaleString("en-US"), active + " agents on the board"],
       ["Units sold",   totalSales.toLocaleString("en-US"), (totalShows ? Math.round(totalSales/totalShows*100) : 0) + "% team close rate"],
       ["Bonus earned", money(totalBonus), "paid across the team"],
-      period === "month"
+      !cur().isTotal
         ? ["Hitting Tier 3", String(data.filter(function(a){ return a.tier === 3; }).length), "10 or more units sold"]
         : (function(){
             const best = data.filter(function(a){ return a.shows >= 20; })
@@ -2046,7 +2231,7 @@ const FALLBACK = [
 
     /* podium: top three by units sold, bonus breaks the tie */
     const top = data.slice().sort(function(a,b){ return b.sales - a.sales || b.bonus - a.bonus; }).slice(0,3);
-    const places = ["1st \u00b7 Gold", "2nd \u00b7 Silver", "3rd \u00b7 Bronze"];
+    const places = ["1st", "2nd", "3rd"];
     $("#podium").innerHTML = top.map(function(a,i){
       return '<div class="pod pod-' + (i+1) + '">' +
         '<span class="pod-rank">' + places[i] + '</span>' +
@@ -2059,7 +2244,7 @@ const FALLBACK = [
     }).join("");
 
     /* header */
-    const cols = COLS.filter(function(c){ return !c.monthOnly || period === "month"; });
+    const cols = COLS.filter(function(c){ return !c.monthOnly || !cur().isTotal; });
     $("#boardHead").innerHTML = cols.map(function(c){
       if(!c.sortable) return '<th>' + c.label + '</th>';
       const on = sortKey === c.key;
@@ -2107,14 +2292,18 @@ const FALLBACK = [
         '<td class="b-num">' + a.sales + '</td>' +
         '<td class="b-num">' + (a.shows ? Math.round(a.rate*100) + "%" : "\u2013") + '</td>' +
         '<td class="b-bar"><div class="bar"><span style="width:' + pct + '%"></span></div></td>' +
-        (period === "month" ? '<td>' + tierCell + '</td>' : "") +
+        (!cur().isTotal ? '<td>' + tierCell + '</td>' : "") +
         '<td class="b-bonus">' + money(a.bonus) + '</td>' +
       '</tr>';
     }).join("");
 
+    let origin = "";
+    if(!salesLive) origin = SALES_SOURCE.useSheet
+      ? "Could not reach the sheet, showing sample data \u00b7 "
+      : "Sample data \u00b7 ";
     $("#boardNote").textContent =
-      "Sample data \u00b7 " + PERIODS[period].label.toLowerCase() + " \u00b7 " +
-      data.length + " agents \u00b7 click any column heading to re-sort";
+      origin + cur().label.toLowerCase() + " \u00b7 " + data.length +
+      " agents \u00b7 click any column heading to re-sort";
   }
 
   function applyFilter(){
@@ -2139,18 +2328,28 @@ const FALLBACK = [
     }
   }
 
-  $("#periodToggle").querySelectorAll("button").forEach(function(b){
-    b.addEventListener("click", function(){
-      if(period === b.dataset.period) return;
-      period = b.dataset.period;
-      $("#periodToggle").querySelectorAll("button").forEach(function(x){
-        x.setAttribute("aria-pressed", String(x.dataset.period === period));
+  function buildPeriodButtons(){
+    const wrap = $("#periodToggle");
+    wrap.querySelectorAll("button").forEach(function(b){ b.remove(); });
+    PERIOD_LIST.forEach(function(pd, i){
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.idx = String(i);
+      b.textContent = pd.label;
+      b.setAttribute("aria-pressed", String(i === period));
+      b.addEventListener("click", function(){
+        if(period === i) return;
+        period = i;
+        wrap.querySelectorAll("button").forEach(function(x){
+          x.setAttribute("aria-pressed", String(Number(x.dataset.idx) === period));
+        });
+        movePeriodPill();
+        buildShows();
+        applyFilter();
       });
-      movePeriodPill();
-      buildShows();
-      applyFilter();
+      wrap.appendChild(b);
     });
-  });
+  }
   window.addEventListener("resize", movePeriodPill);
 
   /* ---------- script reader ---------- */
@@ -2433,7 +2632,14 @@ const FALLBACK = [
     if(view === "guides") buildGuides(sec.links);
     if(view === "admin")   buildAdmin();
     if(view === "scripts") buildScripts(sec.links);
-    if(view === "shows"){ buildShows(); applyFilter(); movePeriodPill(); }
+    if(view === "shows"){
+      if(!salesReady){
+        salesReady = true;
+        loadSales().then(function(){ buildPeriodButtons(); buildShows(); applyFilter(); movePeriodPill(); });
+      } else {
+        buildPeriodButtons(); buildShows(); applyFilter(); movePeriodPill();
+      }
+    }
     if(view !== "faq") $("#notice").hidden = true;
 
     $("#eyebrow").textContent   = sec.eyebrow || (sec.ready ? SITE.eyebrow : "Coming soon");
