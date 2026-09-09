@@ -2112,8 +2112,10 @@ const FALLBACK = [
         if(settled) return;
         clearTimeout(timer); done(); reject(new Error("could not load"));
       };
+      /* headers=1 matters: without it gviz swallows the header row without
+         labelling the columns from it, so the column names vanish entirely */
       el.src = "https://docs.google.com/spreadsheets/d/" + sheetId +
-               "/gviz/tq?tqx=responseHandler:" + cb +
+               "/gviz/tq?tqx=responseHandler:" + cb + "&headers=1" +
                (tabName ? "&sheet=" + encodeURIComponent(tabName) : "");
       document.body.appendChild(el);
     });
