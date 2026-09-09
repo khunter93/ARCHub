@@ -1117,38 +1117,20 @@ const GUIDES = [
    ========================================================================== */
 /* Where the numbers come from.
 
-   ONE AND DONE SETUP
-   ------------------
-   1. In the sheet: File > Share > Publish to web
-   2. Left dropdown:  Entire document
-      Right dropdown: Web page
-      Leave "Automatically republish when changes are made" ticked.
-   3. Publish, copy the link (it ends in /pubhtml), paste it below as sheetUrl.
-   4. Set useSheet to true.
+   Read with JSONP, the same technique as the ARC Call Capacity dashboard: a
+   script tag pointing at Google's gviz endpoint, which is not subject to the
+   cross-origin rules that block fetch(). Tabs are asked for by name, so no
+   publishing, no gids, and nothing to maintain. Add a September tab and a
+   September button appears.
 
-   That is the last time you touch this. The page reads every tab through that
-   one link, so when you add September the month button appears on its own.
-   Each tab needs Agent, Shows, Sales and Bonus headers; any tab without them
-   (notes, working, totals) is skipped automatically. Year to date is added up
-   from the months, so it can never disagree with them.
+   ONE SETTING IS REQUIRED on the sheet:
+     Share > General access > Anyone with the link > Viewer
+   Without it Google bounces the request to a sign in page and the page falls
+   back to the sample numbers below.
 */
 const SALES_SOURCE = {
   useSheet: true,
-
-  /* Route 1: the published document. One link, every tab, new tabs appear
-     on their own. Tried first. */
-  sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbnUtVDickeBF7pPiriXPh___KButfl4fB99twVERizwlY6rdJMbe-j_B1TTGlU2Bp6fitDJpJ0BEv/pubhtml",
-
-  /* Route 2: the normal sheet link, used if route 1 is refused by the browser.
-     Needs the sheet shared as "Anyone with the link can view". Tabs are found
-     by name, so a tab called September is picked up with no changes here. */
-  docUrl: "https://docs.google.com/spreadsheets/d/15ilvK24Se5tA8vqGPg7I_IaWKGmCOcI4ys1fugdLA2U/edit",
-
-  /* Only needed if the above cannot be used, for example when single tabs are
-     published individually instead of the whole document. */
-  csvByMonth: {
-    // "January": ""
-  }
+  sheetId:  "15ilvK24Se5tA8vqGPg7I_IaWKGmCOcI4ys1fugdLA2U"
 };
 
 const SAMPLE_PERIODS = {
@@ -2108,131 +2090,75 @@ const FALLBACK = [
     return isNaN(n) ? 0 : n;
   };
 
-  async function fetchGrid(url){
-    const sep = url.indexOf("?") > -1 ? "&" : "?";
-    const res = await fetch(url + sep + "cb=" + Date.now());
-    if(!res.ok) throw new Error("HTTP " + res.status);
-    return parseCSV(await res.text()).filter(function(r){
-      return r.some(function(c){ return c.trim(); });
+  /* A script tag is not blocked cross-origin, which is why this works where
+     fetch does not. Google calls the named function back with the data. */
+  function gvizTab(sheetId, tabName){
+    return new Promise(function(resolve, reject){
+      const cb = "arcGviz_" + Math.random().toString(36).slice(2);
+      const el = document.createElement("script");
+      let settled = false;
+      const done = function(){ settled = true; delete window[cb]; el.remove(); };
+      const timer = setTimeout(function(){
+        if(!settled){ done(); reject(new Error("timed out")); }
+      }, 15000);
+
+      window[cb] = function(resp){
+        if(settled) return;
+        clearTimeout(timer); done();
+        if(!resp || resp.status === "error") reject(new Error("tab not found"));
+        else resolve(resp);
+      };
+      el.onerror = function(){
+        if(settled) return;
+        clearTimeout(timer); done(); reject(new Error("could not load"));
+      };
+      el.src = "https://docs.google.com/spreadsheets/d/" + sheetId +
+               "/gviz/tq?sheet=" + encodeURIComponent(tabName) +
+               "&tqx=responseHandler:" + cb;
+      document.body.appendChild(el);
     });
   }
 
-  /* header names are matched loosely, so Sales, Total Sales and sales all work */
-  function readGrid(grid, forcedMonth){
-    if(grid.length < 2) throw new Error("no rows under the header");
-    const head = grid[0].map(function(h){ return h.trim().toLowerCase(); });
-    const col = function(n){
-      return head.findIndex(function(h){ return h === n || h.indexOf(n) > -1; });
-    };
-    const iM = col("month"), iA = col("agent"), iSh = col("show"), iSa = col("sale"), iB = col("bonus");
-    if(iA < 0 || iSh < 0 || iSa < 0) throw new Error("need Agent, Shows and Sales columns");
-    if(iM < 0 && !forcedMonth) throw new Error("need a Month column");
-
-    return grid.slice(1)
-      .filter(function(r){ return (r[iA] || "").trim(); })
-      .map(function(r){
-        return {
-          month: forcedMonth || (r[iM] || "").trim(),
-          agent: r[iA].trim(),
-          shows: num(r[iSh]),
-          sales: num(r[iSa]),
-          bonus: iB >= 0 ? num(r[iB]) : 0
-        };
-      })
-      .filter(function(r){ return r.month; });
-  }
-
-  /* The published document is one HTML page holding every tab, so a single
-     link keeps working as tabs are added. */
-  async function tabsFromPublishedDoc(url){
-    const base = url.split("?")[0].replace(/\/(pubhtml|pub)$/, "");
-    const res = await fetch(base + "/pubhtml?cb=" + Date.now());
-    if(!res.ok) throw new Error("HTTP " + res.status);
-    const doc = new DOMParser().parseFromString(await res.text(), "text/html");
-
-    const names = Array.prototype.map.call(
-      doc.querySelectorAll("#sheet-menu li a"),
-      function(a){ return a.textContent.trim(); }
-    );
-    const tables = doc.querySelectorAll("table");
-    if(!tables.length) throw new Error("no tables in the published page");
-
-    const out = [];
-    Array.prototype.forEach.call(tables, function(tbl, i){
-      const grid = Array.prototype.map.call(tbl.querySelectorAll("tr"), function(tr){
-        return Array.prototype.map.call(tr.querySelectorAll("td,th"), function(c){
-          return c.textContent.trim();
-        });
-      });
-      /* published pages carry a row-number gutter and sometimes blank lead rows,
-         so find the header row rather than assuming it is first */
-      const h = grid.findIndex(function(r){
-        return r.some(function(c){ return c.toLowerCase() === "agent"; });
-      });
-      if(h < 0) return;                       /* not a data tab, skip it */
-      out.push({ name: names[i] || ("Sheet " + (i + 1)), grid: grid.slice(h) });
+  /* gviz treats the first row as headers, so the column labels are the
+     Agent / Shows / Sales / Bonus you typed in the sheet */
+  function rowsFromGviz(resp, monthName){
+    const cols = (resp.table.cols || []).map(function(c){
+      return String(c.label || c.id || "").trim().toLowerCase();
     });
-    if(!out.length) throw new Error("no tab had an Agent column");
-    return out;
-  }
+    const at = function(n){ return cols.findIndex(function(c){ return c.indexOf(n) > -1; }); };
+    const iA = at("agent"), iSh = at("show"), iSa = at("sale"), iB = at("bonus");
+    if(iA < 0 || iSh < 0 || iSa < 0) return [];
 
-  /* Fallback route: ask each month tab for itself by name. Google's gviz
-     endpoint answers cross-origin requests, which the published page may not. */
-  async function tabsByMonthName(docUrl){
-    const m = String(docUrl || "").match(/\/d\/([a-zA-Z0-9-_]+)/);
-    if(!m) throw new Error("could not find the sheet id in docUrl");
-    const id = m[1];
-    const names = MONTH_ORDER.map(function(n){ return n.charAt(0).toUpperCase() + n.slice(1); });
-
-    const tries = await Promise.all(names.map(async function(name){
-      try{
-        const u = "https://docs.google.com/spreadsheets/d/" + id +
-                  "/gviz/tq?tqx=out:csv&sheet=" + encodeURIComponent(name) + "&cb=" + Date.now();
-        const res = await fetch(u);
-        if(!res.ok) return null;
-        const txt = await res.text();
-        if(/^\s*</.test(txt)) return null;          /* an error page, not csv */
-        const grid = parseCSV(txt).filter(function(r){ return r.some(function(c){ return c.trim(); }); });
-        const h = grid.findIndex(function(r){
-          return r.some(function(c){ return c.trim().toLowerCase() === "agent"; });
-        });
-        if(h < 0) return null;
-        return { name:name, grid:grid.slice(h) };
-      }catch(e){ return null; }
-    }));
-    const got = tries.filter(Boolean);
-    if(!got.length) throw new Error("no month tabs answered");
-    return got;
+    return (resp.table.rows || []).map(function(r){
+      const cell = function(i){
+        const c = r.c && r.c[i];
+        return c ? (c.v != null ? c.v : c.f) : null;
+      };
+      return {
+        month: monthName,
+        agent: String(cell(iA) == null ? "" : cell(iA)).trim(),
+        shows: num(cell(iSh)),
+        sales: num(cell(iSa)),
+        bonus: iB >= 0 ? num(cell(iB)) : 0
+      };
+    }).filter(function(x){ return x.agent; });
   }
 
   async function loadSales(){
-    if(!SALES_SOURCE.useSheet) return false;
+    if(!SALES_SOURCE.useSheet || !SALES_SOURCE.sheetId) return false;
     try{
-      let recs = [];
-      let tabs = null;
+      const names = MONTH_ORDER.map(function(n){ return n.charAt(0).toUpperCase() + n.slice(1); });
 
-      if(/^https?:\/\//.test(SALES_SOURCE.sheetUrl || "")){
-        try { tabs = await tabsFromPublishedDoc(SALES_SOURCE.sheetUrl); }
-        catch(e){ console.warn("published page route failed:", e.message); }
-      }
-      if(!tabs && /^https?:\/\//.test(SALES_SOURCE.docUrl || "")){
-        tabs = await tabsByMonthName(SALES_SOURCE.docUrl);
-      }
+      /* ask every month for itself; the ones that do not exist simply fail */
+      const answers = await Promise.all(names.map(function(name){
+        return gvizTab(SALES_SOURCE.sheetId, name)
+          .then(function(resp){ return rowsFromGviz(resp, name); })
+          .catch(function(){ return []; });
+      }));
 
-      if(tabs){
-        tabs.forEach(function(t){
-          try { recs = recs.concat(readGrid(t.grid, t.name)); }
-          catch(e){ /* tab without the right columns, ignore it */ }
-        });
-      } else {
-        const byMonth = SALES_SOURCE.csvByMonth || {};
-        const keys = Object.keys(byMonth).filter(function(k){ return /^https?:\/\//.test(byMonth[k]); });
-        if(!keys.length) return false;
-        const grids = await Promise.all(keys.map(function(m){ return fetchGrid(byMonth[m]); }));
-        grids.forEach(function(g, i){ recs = recs.concat(readGrid(g, keys[i])); });
-      }
+      const recs = answers.reduce(function(all, part){ return all.concat(part); }, []);
+      if(!recs.length) throw new Error("no month tabs returned any agents");
 
-      if(!recs.length) throw new Error("no usable rows");
       PERIOD_LIST = periodsFromRows(recs);
       period = Math.max(0, PERIOD_LIST.length - 2);   /* newest month, not the total */
       salesLive = true;
@@ -2355,9 +2281,9 @@ const FALLBACK = [
     } else {
       notice.hidden = false;
       notice.innerHTML = SALES_SOURCE.useSheet
-        ? "<strong>These are sample numbers, not your sheet.</strong> The browser couldn't read it. " +
-          "If you're opening this file from your computer rather than the website, that's the cause. " +
-          "Otherwise press F12 and check the Console for a line starting \u201cShows &amp; Sales sheet\u201d."
+        ? "<strong>These are sample numbers, not your sheet.</strong> The usual cause is the sheet's " +
+          "sharing: it needs <em>Anyone with the link, Viewer</em>. Opening this file from your computer " +
+          "rather than the website will also do it."
         : "<strong>Sample data.</strong> Set <code>useSheet: true</code> in the script to read the live sheet.";
     }
     $("#boardNote").textContent =
