@@ -2119,29 +2119,46 @@ const FALLBACK = [
     });
   }
 
-  /* gviz treats the first row as headers, so the column labels are the
-     Agent / Shows / Sales / Bonus you typed in the sheet */
+  /* gviz only labels columns when it recognises a header row, and it often
+     does not. So look for the row containing "Agent" and take the columns
+     from there, wherever it sits. */
   function rowsFromGviz(resp, monthName){
-    const cols = (resp.table.cols || []).map(function(c){
-      return String(c.label || c.id || "").trim().toLowerCase();
+    const table = resp && resp.table ? resp.table : {};
+    const labels = (table.cols || []).map(function(c){ return c.label || ""; });
+    const grid = (table.rows || []).map(function(r){
+      return (r.c || []).map(function(c){ return c ? (c.v != null ? c.v : c.f) : null; });
     });
-    const at = function(n){ return cols.findIndex(function(c){ return c.indexOf(n) > -1; }); };
-    const iA = at("agent"), iSh = at("show"), iSa = at("sale"), iB = at("bonus");
-    if(iA < 0 || iSh < 0 || iSa < 0) return [];
 
-    return (resp.table.rows || []).map(function(r){
-      const cell = function(i){
-        const c = r.c && r.c[i];
-        return c ? (c.v != null ? c.v : c.f) : null;
+    const txt = function(v){ return String(v == null ? "" : v).trim().toLowerCase(); };
+    const findCols = function(arr){
+      const at = function(n){
+        return arr.findIndex(function(c){ return txt(c).indexOf(n) > -1; });
       };
+      return { a:at("agent"), sh:at("show"), sa:at("sale"), b:at("bonus") };
+    };
+
+    let idx = findCols(labels), start = 0;
+    if(idx.a < 0 || idx.sh < 0 || idx.sa < 0){
+      const h = grid.findIndex(function(r){
+        return r.some(function(c){ return txt(c) === "agent"; });
+      });
+      if(h < 0) return [];
+      idx = findCols(grid[h]);
+      start = h + 1;
+    }
+    if(idx.a < 0 || idx.sh < 0 || idx.sa < 0) return [];
+
+    return grid.slice(start).map(function(r){
       return {
         month: monthName,
-        agent: String(cell(iA) == null ? "" : cell(iA)).trim(),
-        shows: num(cell(iSh)),
-        sales: num(cell(iSa)),
-        bonus: iB >= 0 ? num(cell(iB)) : 0
+        agent: String(r[idx.a] == null ? "" : r[idx.a]).trim(),
+        shows: num(r[idx.sh]),
+        sales: num(r[idx.sa]),
+        bonus: idx.b >= 0 ? num(r[idx.b]) : 0
       };
-    }).filter(function(x){ return x.agent; });
+    }).filter(function(x){
+      return x.agent && txt(x.agent) !== "agent" && txt(x.agent) !== "total";
+    });
   }
 
   /* Run arcSalesDiagnose() in the console to see what each tab did. */
