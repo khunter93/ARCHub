@@ -372,6 +372,12 @@ mark{background:var(--amber);color:var(--amber-deep);border-radius:3px;padding:0
 .linkcard:hover .linkcard-host{color:var(--accent-ink)}
 
 /* shows & sales leaderboard */
+.salesnotice{
+  background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 34%,transparent);
+  border-radius:var(--r);padding:13px 17px;margin-bottom:22px;
+  font-size:14.5px;color:var(--warn);
+}
+.salesnotice strong{font-weight:600}
 .periodwrap{display:flex;justify-content:center;margin-bottom:26px}
 .periodtoggle{
   position:relative;display:inline-flex;gap:3px;padding:3px;
@@ -951,6 +957,7 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
 <section class="links" id="linksPanel" hidden></section>
 
 <section class="shows" id="showsPanel" hidden>
+  <div class="salesnotice" id="salesNotice" hidden></div>
   <div class="periodwrap">
     <div class="periodtoggle noanim" id="periodToggle" role="group" aria-label="Reporting period">
       <span class="periodslide" id="periodSlide" aria-hidden="true"></span>
@@ -1127,7 +1134,15 @@ const GUIDES = [
 */
 const SALES_SOURCE = {
   useSheet: true,
+
+  /* Route 1: the published document. One link, every tab, new tabs appear
+     on their own. Tried first. */
   sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbnUtVDickeBF7pPiriXPh___KButfl4fB99twVERizwlY6rdJMbe-j_B1TTGlU2Bp6fitDJpJ0BEv/pubhtml",
+
+  /* Route 2: the normal sheet link, used if route 1 is refused by the browser.
+     Needs the sheet shared as "Anyone with the link can view". Tabs are found
+     by name, so a tab called September is picked up with no changes here. */
+  docUrl: "https://docs.google.com/spreadsheets/d/15ilvK24Se5tA8vqGPg7I_IaWKGmCOcI4ys1fugdLA2U/edit",
 
   /* Only needed if the above cannot be used, for example when single tabs are
      published individually instead of the whole document. */
@@ -2161,13 +2176,50 @@ const FALLBACK = [
     return out;
   }
 
+  /* Fallback route: ask each month tab for itself by name. Google's gviz
+     endpoint answers cross-origin requests, which the published page may not. */
+  async function tabsByMonthName(docUrl){
+    const m = String(docUrl || "").match(/\/d\/([a-zA-Z0-9-_]+)/);
+    if(!m) throw new Error("could not find the sheet id in docUrl");
+    const id = m[1];
+    const names = MONTH_ORDER.map(function(n){ return n.charAt(0).toUpperCase() + n.slice(1); });
+
+    const tries = await Promise.all(names.map(async function(name){
+      try{
+        const u = "https://docs.google.com/spreadsheets/d/" + id +
+                  "/gviz/tq?tqx=out:csv&sheet=" + encodeURIComponent(name) + "&cb=" + Date.now();
+        const res = await fetch(u);
+        if(!res.ok) return null;
+        const txt = await res.text();
+        if(/^\s*</.test(txt)) return null;          /* an error page, not csv */
+        const grid = parseCSV(txt).filter(function(r){ return r.some(function(c){ return c.trim(); }); });
+        const h = grid.findIndex(function(r){
+          return r.some(function(c){ return c.trim().toLowerCase() === "agent"; });
+        });
+        if(h < 0) return null;
+        return { name:name, grid:grid.slice(h) };
+      }catch(e){ return null; }
+    }));
+    const got = tries.filter(Boolean);
+    if(!got.length) throw new Error("no month tabs answered");
+    return got;
+  }
+
   async function loadSales(){
     if(!SALES_SOURCE.useSheet) return false;
     try{
       let recs = [];
+      let tabs = null;
 
       if(/^https?:\/\//.test(SALES_SOURCE.sheetUrl || "")){
-        const tabs = await tabsFromPublishedDoc(SALES_SOURCE.sheetUrl);
+        try { tabs = await tabsFromPublishedDoc(SALES_SOURCE.sheetUrl); }
+        catch(e){ console.warn("published page route failed:", e.message); }
+      }
+      if(!tabs && /^https?:\/\//.test(SALES_SOURCE.docUrl || "")){
+        tabs = await tabsByMonthName(SALES_SOURCE.docUrl);
+      }
+
+      if(tabs){
         tabs.forEach(function(t){
           try { recs = recs.concat(readGrid(t.grid, t.name)); }
           catch(e){ /* tab without the right columns, ignore it */ }
@@ -2297,12 +2349,20 @@ const FALLBACK = [
       '</tr>';
     }).join("");
 
-    let origin = "";
-    if(!salesLive) origin = SALES_SOURCE.useSheet
-      ? "Could not reach the sheet, showing sample data \u00b7 "
-      : "Sample data \u00b7 ";
+    const notice = $("#salesNotice");
+    if(salesLive){
+      notice.hidden = true;
+    } else {
+      notice.hidden = false;
+      notice.innerHTML = SALES_SOURCE.useSheet
+        ? "<strong>These are sample numbers, not your sheet.</strong> The browser couldn't read it. " +
+          "If you're opening this file from your computer rather than the website, that's the cause. " +
+          "Otherwise press F12 and check the Console for a line starting \u201cShows &amp; Sales sheet\u201d."
+        : "<strong>Sample data.</strong> Set <code>useSheet: true</code> in the script to read the live sheet.";
+    }
     $("#boardNote").textContent =
-      origin + cur().label.toLowerCase() + " \u00b7 " + data.length +
+      (salesLive ? "Live from the sheet \u00b7 " : "Sample data \u00b7 ") +
+      cur().label.toLowerCase() + " \u00b7 " + data.length +
       " agents \u00b7 click any column heading to re-sort";
   }
 
