@@ -378,41 +378,59 @@ mark{background:var(--amber);color:var(--amber-deep);border-radius:3px;padding:0
   font-size:14.5px;color:var(--warn);
 }
 .salesnotice strong{font-weight:600}
-.periodwrap{display:flex;justify-content:center;margin-bottom:26px}
+/* the whole period row is lifted, otherwise the open menu is painted over by
+   the podium cards further down the page */
+.periodwrap{display:flex;justify-content:center;margin-bottom:26px;position:relative;z-index:30}
 /* the picker is positioned out of the flow, so revealing it cannot nudge
    the buttons sideways */
-.periodrow{position:relative;display:inline-flex}
-#pastSelect{
-  position:absolute;left:calc(100% + 10px);top:50%;
+.periodrow{position:relative;display:inline-flex;z-index:30}
+.monthpick{
+  position:absolute;left:calc(100% + 10px);top:50%;z-index:30;
   opacity:0;visibility:hidden;
   transform:translateY(-50%) translateX(-10px) scale(.96);
   transition:opacity .22s ease, transform .26s cubic-bezier(.4,0,.2,1), visibility 0s .26s;
-  height:38px;
-  appearance:none;
-  border:1px solid var(--line);border-radius:20px;background:var(--card);
-  color:var(--ink);padding:0 36px 0 16px;cursor:pointer;
-  font-family:var(--body);font-size:14px;outline:0;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238794A3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
-  background-repeat:no-repeat;background-position:right 14px center;
 }
-#pastSelect:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-#pastSelect.show{
+.monthpick.show{
   opacity:1;visibility:visible;
   transform:translateY(-50%) translateX(0) scale(1);
   transition:opacity .22s ease, transform .26s cubic-bezier(.4,0,.2,1), visibility 0s;
 }
+.monthpick-btn{
+  height:38px;padding:0 15px;cursor:pointer;white-space:nowrap;
+  border:1px solid var(--line);border-radius:20px;background:var(--card);
+  color:var(--ink);font-family:var(--body);font-size:14px;
+  display:inline-flex;align-items:center;gap:10px;
+  transition:border-color .15s, box-shadow .15s;
+}
+.monthpick-btn:hover{border-color:var(--slate-2)}
+.monthpick-btn svg{color:var(--slate-2);transition:transform .2s, color .15s}
+.monthpick.open .monthpick-btn{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.monthpick.open .monthpick-btn svg{transform:rotate(180deg);color:var(--accent)}
+.monthpick-menu{
+  position:absolute;top:calc(100% + 7px);left:0;min-width:100%;z-index:25;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);padding:6px;
+  display:none;flex-direction:column;gap:2px;
+}
+.monthpick.open .monthpick-menu{display:flex}
+.monthpick-opt{
+  border:0;background:transparent;cursor:pointer;text-align:left;
+  padding:8px 14px;border-radius:8px;white-space:nowrap;
+  font-family:var(--body);font-size:14px;color:var(--ink-2);
+  transition:background .13s, color .13s;
+}
+.monthpick-opt:hover{background:var(--line-soft);color:var(--ink)}
+.monthpick-opt[aria-selected="true"]{
+  background:var(--accent-soft);color:var(--accent-ink);font-weight:600;
+}
 
 @media (max-width:700px){
-  /* no room to hang it off the side, so it drops underneath instead */
   .periodrow{flex-direction:column;align-items:center}
-  #pastSelect{
-    position:static;transform:translateY(-6px);
-    margin-top:0;height:0;padding-top:0;padding-bottom:0;border-width:0;
+  .monthpick{
+    position:static;transform:translateY(-6px);height:0;
     transition:opacity .2s ease, transform .24s ease, height .24s ease, margin-top .24s ease;
   }
-  #pastSelect.show{
-    transform:translateY(0);height:38px;margin-top:10px;border-width:1px;
-  }
+  .monthpick.show{transform:translateY(0);height:38px;margin-top:10px}
 }
 .periodtoggle{
   position:relative;display:inline-flex;gap:3px;padding:3px;
@@ -429,7 +447,9 @@ mark{background:var(--amber);color:var(--amber-deep);border-radius:3px;padding:0
 .periodtoggle button{
   position:relative;z-index:1;
   border:0;background:transparent;cursor:pointer;color:var(--slate);
-  border-radius:20px;padding:8px 20px;
+  border-radius:20px;padding:8px 16px;
+  /* all three sized for the longest label, so the gaps read as even */
+  min-width:138px;text-align:center;justify-content:center;
   font-family:var(--mono);font-size:11px;font-weight:500;
   letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;
   transition:color .22s ease;
@@ -997,7 +1017,13 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
       <div class="periodtoggle noanim" id="periodToggle" role="group" aria-label="Reporting period">
         <span class="periodslide" id="periodSlide" aria-hidden="true"></span>
       </div>
-      <select id="pastSelect" aria-label="Choose a month"></select>
+      <div class="monthpick" id="monthPick">
+        <button class="monthpick-btn" type="button" id="monthPickBtn" aria-haspopup="listbox" aria-expanded="false">
+          <span id="monthPickLabel">Month</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="monthpick-menu" id="monthPickMenu" role="listbox" aria-label="Choose a month"></div>
+      </div>
     </div>
   </div>
   <div class="stats" id="statTiles"></div>
@@ -1100,32 +1126,38 @@ const SITE = {
    ========================================================================== */
 const LINKS = [
   { group: "Every shift", items: [
-    { label:"Volie", url:"https://volie.com/" },
-    { label:"Clock in / out", url:"http://clock.adp.com/" },
-    { label:"Email", url:"http://mail.absoluteresults.com/" },
-    { label:"Work Place", url:"https://absoluteresults.workplace.com/" },
-    { label:"Internet speed test", url:"https://www.speedtest.net/",
-      note:"Worth checking before you report a line issue" }
+    { label:"Volie", url:"https://volie.com/",
+      note:"The dialer you make calls from." },
+    { label:"ADP Clock", url:"http://clock.adp.com/",
+      note:"Clock in and out of your shift." },
+    { label:"Email", url:"http://mail.absoluteresults.com/",
+      note:"Your Absolute Results inbox." },
+    { label:"Speedtest", url:"https://www.speedtest.net/",
+      note:"Check your connection speed." }
   ]},
   { group: "Schedule & performance", items: [
-    { label:"Work schedule", url:"https://docs.google.com/spreadsheets/d/1rBah4wfzg-Eoo7jOAAIgZNVkWObmyVW5aTBoFNMWbpE/edit?gid=440570234#gid=440570234" },
-    { label:"ARC Shows & Sales 2026", url:"https://docs.google.com/spreadsheets/d/15ilvK24Se5tA8vqGPg7I_IaWKGmCOcI4ys1fugdLA2U/edit?gid=1060368238#gid=1060368238" },
-    { label:"ARC bonus structure", url:"https://docs.google.com/document/d/1AoRopHipLqFGCGuwcZKpKUVeywkaubZ7cvUmJP4VLR0/edit?usp=sharing" }
+    { label:"Work schedule", url:"https://docs.google.com/spreadsheets/d/1rBah4wfzg-Eoo7jOAAIgZNVkWObmyVW5aTBoFNMWbpE/edit?gid=440570234#gid=440570234",
+      note:"Who is working which shift." },
+    { label:"Shows & Sales", url:"https://docs.google.com/spreadsheets/d/15ilvK24Se5tA8vqGPg7I_IaWKGmCOcI4ys1fugdLA2U/edit?gid=1060368238#gid=1060368238",
+      note:"Monthly shows, sales and bonus by agent." },
+    { label:"Bonus structure", url:"https://docs.google.com/document/d/1AoRopHipLqFGCGuwcZKpKUVeywkaubZ7cvUmJP4VLR0/edit?usp=sharing",
+      note:"How bonuses and tiers are calculated." }
   ]},
   { group: "Pay, time off & benefits", items: [
-    { label:"Paystubs & time card", url:"https://workforcenow.adp.com/workforcenow/login.html",
-      note:"Myself > Time & Attendance > My Timecard" },
-    { label:"Time off requests", url:"https://absoluteresults.bamboohr.com/login.php?r=%2Fhome",
-      note:"BambooHR" },
-    { label:"Benefits", url:"https://my.canadalife.com/sign-in",
-      note:"Canada Life" }
+    { label:"ADP", url:"https://workforcenow.adp.com/workforcenow/login.html",
+      note:"Paystubs and time card." },
+    { label:"BambooHR", url:"https://absoluteresults.bamboohr.com/login.php?r=%2Fhome",
+      note:"Book time off and check your balance." },
+    { label:"Canada Life", url:"https://my.canadalife.com/sign-in",
+      note:"Health and dental benefits and claims." }
   ]},
   { group: "Reference documents", items: [
-    { label:"Scripts", url:"https://docs.google.com/spreadsheets/d/1Vg1BxXwWrIcbuka5qAuf9xBhgbFrNy4FEcdHsW3G6AY/edit?usp=sharing" },
+    { label:"Scripts", url:"https://docs.google.com/spreadsheets/d/1Vg1BxXwWrIcbuka5qAuf9xBhgbFrNy4FEcdHsW3G6AY/edit?usp=sharing",
+      note:"Master sheet of every call script." },
     { label:"Disposition definitions", url:"https://docs.google.com/document/d/1s8Q_PCW3jRTnDyEi8gk1ZAaSE24vMHTEm_dImBl1SxM/edit?usp=sharing",
-      note:"What each disposition means and when to use it" },
-    { label:"FAQ source document", url:"https://docs.google.com/document/d/14xxp6qQjFq2U1t65FrKf6HEBC5jdI_dMMffEEpVgeJ0/edit?usp=sharing",
-      note:"The document this page was built from" }
+      note:"What each disposition means." },
+    { label:"FAQ document", url:"https://docs.google.com/document/d/14xxp6qQjFq2U1t65FrKf6HEBC5jdI_dMMffEEpVgeJ0/edit?usp=sharing",
+      note:"The source document for this FAQ." }
   ]}
 ];
 
@@ -2296,17 +2328,18 @@ const FALLBACK = [
     /* summary tiles */
     const tiles = [
       ["Shows booked", totalShows.toLocaleString("en-US"), active + " agents on the board"],
-      ["Units sold",   totalSales.toLocaleString("en-US"), (totalShows ? Math.round(totalSales/totalShows*100) : 0) + "% team close rate"],
+      ["Units sold",   totalSales.toLocaleString("en-US"),
+        cur().isTotal
+          ? (PERIOD_LIST.length - 1) + " months of data"
+          : (totalShows ? Math.round(totalSales/totalShows*100) : 0) + "% team close rate"],
       ["Bonus earned", money(totalBonus), "paid across the team"],
       !cur().isTotal
         ? ["Hitting Tier 3", String(data.filter(function(a){ return a.tier === 3; }).length), "10 or more units sold"]
-        : (function(){
-            const best = data.filter(function(a){ return a.shows >= 20; })
-                             .sort(function(x,y){ return y.rate - x.rate; })[0];
-            return best
-              ? ["Best close rate", Math.round(best.rate*100) + "%", best.name]
-              : ["Best close rate", "\u2013", "not enough volume yet"];
-          })()
+        /* total sales over total shows, not the mean of each agent's rate:
+           averaging rates lets someone with one show swing the number */
+        : ["Average close rate",
+           (totalShows ? Math.round(totalSales / totalShows * 100) : 0) + "%",
+           "sales per show across the team"]
     ];
     $("#statTiles").innerHTML = tiles.map(function(t){
       return '<div class="stat"><span class="stat-label">' + t[0] + '</span>' +
@@ -2426,7 +2459,7 @@ const FALLBACK = [
   let lastPast = null;
 
   function buildPeriodButtons(){
-    const wrap = $("#periodToggle"), sel = $("#pastSelect");
+    const wrap = $("#periodToggle");
     wrap.querySelectorAll("button").forEach(function(b){ b.remove(); });
 
     const latest = PERIOD_LIST.length - 2;      /* newest month */
@@ -2462,15 +2495,25 @@ const FALLBACK = [
       wrap.appendChild(b);
     });
 
-    sel.innerHTML = "";
+    const pick = $("#monthPick"), menu = $("#monthPickMenu");
+    menu.innerHTML = "";
     older.forEach(function(i){
-      const o = document.createElement("option");
-      o.value = String(i);
+      const o = document.createElement("button");
+      o.className = "monthpick-opt";
+      o.type = "button";
+      o.setAttribute("role", "option");
+      o.setAttribute("aria-selected", String(i === period));
       o.textContent = PERIOD_LIST[i].label;
-      if(i === period) o.selected = true;
-      sel.appendChild(o);
+      o.addEventListener("click", function(){
+        period = i; lastPast = i;
+        closeMonthPick();
+        refreshPeriodUI();
+      });
+      menu.appendChild(o);
     });
-    sel.classList.toggle("show", !!(older.length && onPast));
+    $("#monthPickLabel").textContent = onPast ? PERIOD_LIST[period].label : "Month";
+    pick.classList.toggle("show", !!(older.length && onPast));
+    if(!onPast) closeMonthPick();
   }
 
   function refreshPeriodUI(){
@@ -2480,10 +2523,21 @@ const FALLBACK = [
     applyFilter();
   }
 
-  $("#pastSelect").addEventListener("change", function(){
-    period = Number(this.value);
-    lastPast = period;
-    refreshPeriodUI();
+  function closeMonthPick(){
+    $("#monthPick").classList.remove("open");
+    $("#monthPickBtn").setAttribute("aria-expanded", "false");
+  }
+  $("#monthPickBtn").addEventListener("click", function(e){
+    e.stopPropagation();
+    const pick = $("#monthPick");
+    const open = pick.classList.toggle("open");
+    this.setAttribute("aria-expanded", String(open));
+  });
+  document.addEventListener("click", function(e){
+    if(!$("#monthPick").contains(e.target)) closeMonthPick();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") closeMonthPick();
   });
 
   window.addEventListener("resize", movePeriodPill);
