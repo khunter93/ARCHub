@@ -2139,13 +2139,21 @@ const FALLBACK = [
 
     let idx = findCols(labels), start = 0;
     if(idx.a < 0 || idx.sh < 0 || idx.sa < 0){
-      const h = grid.findIndex(function(r){
-        return r.some(function(c){ return txt(c) === "agent"; });
+      /* the header row is whichever row mentions agent, or failing that
+         mentions both shows and sales */
+      let h = grid.findIndex(function(r){
+        return r.some(function(c){ return txt(c).indexOf("agent") > -1; });
+      });
+      if(h < 0) h = grid.findIndex(function(r){
+        return r.some(function(c){ return txt(c).indexOf("show") > -1; }) &&
+               r.some(function(c){ return txt(c).indexOf("sale") > -1; });
       });
       if(h < 0) return [];
       idx = findCols(grid[h]);
       start = h + 1;
     }
+    /* no agent column but shows and sales found: take the first column as the name */
+    if(idx.a < 0 && idx.sh >= 0 && idx.sa >= 0) idx.a = 0;
     if(idx.a < 0 || idx.sh < 0 || idx.sa < 0) return [];
 
     return grid.slice(start).map(function(r){
@@ -2203,8 +2211,12 @@ const FALLBACK = [
           .then(function(resp){
             const got = rowsFromGviz(resp, name);
             if(!got.length){
-              const cols = (resp.table.cols || []).map(function(c){ return c.label || c.id; });
-              console.warn("Shows & Sales: tab \u201c" + name + "\u201d answered but gave no agents. Columns seen:", cols);
+              const preview = (resp.table.rows || []).slice(0, 6).map(function(r){
+                return (r.c || []).slice(0, 8).map(function(c){
+                  return c ? (c.v != null ? c.v : c.f) : null;
+                });
+              });
+              console.warn("Shows & Sales: tab \u201c" + name + "\u201d gave no agents. First rows as received:", preview);
             }
             return got;
           })
