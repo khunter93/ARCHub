@@ -378,18 +378,42 @@ mark{background:var(--amber);color:var(--amber-deep);border-radius:3px;padding:0
   font-size:14.5px;color:var(--warn);
 }
 .salesnotice strong{font-weight:600}
-.periodwrap{display:flex;justify-content:center;margin-bottom:12px}
-.pastwrap{display:flex;justify-content:center;margin-bottom:22px}
-.pastwrap[hidden]{display:none}
+.periodwrap{display:flex;justify-content:center;margin-bottom:26px}
+/* the picker is positioned out of the flow, so revealing it cannot nudge
+   the buttons sideways */
+.periodrow{position:relative;display:inline-flex}
 #pastSelect{
+  position:absolute;left:calc(100% + 10px);top:50%;
+  opacity:0;visibility:hidden;
+  transform:translateY(-50%) translateX(-10px) scale(.96);
+  transition:opacity .22s ease, transform .26s cubic-bezier(.4,0,.2,1), visibility 0s .26s;
+  height:38px;
   appearance:none;
   border:1px solid var(--line);border-radius:20px;background:var(--card);
-  color:var(--ink);padding:8px 36px 8px 16px;cursor:pointer;
+  color:var(--ink);padding:0 36px 0 16px;cursor:pointer;
   font-family:var(--body);font-size:14px;outline:0;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238794A3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
   background-repeat:no-repeat;background-position:right 14px center;
 }
 #pastSelect:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#pastSelect.show{
+  opacity:1;visibility:visible;
+  transform:translateY(-50%) translateX(0) scale(1);
+  transition:opacity .22s ease, transform .26s cubic-bezier(.4,0,.2,1), visibility 0s;
+}
+
+@media (max-width:700px){
+  /* no room to hang it off the side, so it drops underneath instead */
+  .periodrow{flex-direction:column;align-items:center}
+  #pastSelect{
+    position:static;transform:translateY(-6px);
+    margin-top:0;height:0;padding-top:0;padding-bottom:0;border-width:0;
+    transition:opacity .2s ease, transform .24s ease, height .24s ease, margin-top .24s ease;
+  }
+  #pastSelect.show{
+    transform:translateY(0);height:38px;margin-top:10px;border-width:1px;
+  }
+}
 .periodtoggle{
   position:relative;display:inline-flex;gap:3px;padding:3px;
   background:var(--card);border:1px solid var(--line);border-radius:24px;
@@ -969,12 +993,12 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
 <section class="shows" id="showsPanel" hidden>
   <div class="salesnotice" id="salesNotice" hidden></div>
   <div class="periodwrap">
-    <div class="periodtoggle noanim" id="periodToggle" role="group" aria-label="Reporting period">
-      <span class="periodslide" id="periodSlide" aria-hidden="true"></span>
+    <div class="periodrow">
+      <div class="periodtoggle noanim" id="periodToggle" role="group" aria-label="Reporting period">
+        <span class="periodslide" id="periodSlide" aria-hidden="true"></span>
+      </div>
+      <select id="pastSelect" aria-label="Choose a month"></select>
     </div>
-  </div>
-  <div class="pastwrap" id="pastWrap" hidden>
-    <select id="pastSelect" aria-label="Choose a month"></select>
   </div>
   <div class="stats" id="statTiles"></div>
   <div class="podium" id="podium"></div>
@@ -2397,10 +2421,12 @@ const FALLBACK = [
     }
   }
 
-  /* Three choices, not one per month: this month, the year, and a dropdown
-     for anything older. */
+  /* Three fixed choices: this month, the year, and older months behind a
+     picker that only appears when you are actually on one. */
+  let lastPast = null;
+
   function buildPeriodButtons(){
-    const wrap = $("#periodToggle"), pastWrap = $("#pastWrap"), sel = $("#pastSelect");
+    const wrap = $("#periodToggle"), sel = $("#pastSelect");
     wrap.querySelectorAll("button").forEach(function(b){ b.remove(); });
 
     const latest = PERIOD_LIST.length - 2;      /* newest month */
@@ -2410,40 +2436,32 @@ const FALLBACK = [
 
     const onPast = period < latest;
     const defs = [
-      { kind:"latest", label:"This month",  idx:latest },
+      { kind:"latest", label:(PERIOD_LIST[latest] || {}).label || "This month", idx:latest },
       { kind:"ytd",    label:"Year to date", idx:ytd }
     ];
-    if(older.length) defs.push({
-      kind:"past",
-      label: onPast ? PERIOD_LIST[period].label : "Past months"
-    });
+    if(older.length) defs.push({ kind:"past", label:"Past months" });
 
     defs.forEach(function(d){
       const b = document.createElement("button");
       b.type = "button";
       b.dataset.kind = d.kind;
       b.textContent = d.label;
-      const active = d.kind === "past" ? onPast : period === d.idx;
-      b.setAttribute("aria-pressed", String(active));
+      b.setAttribute("aria-pressed", String(d.kind === "past" ? onPast : period === d.idx));
       b.addEventListener("click", function(){
         if(d.kind === "past"){
-          if(onPast){                       /* already on a past month: just toggle the list */
-            pastWrap.hidden = !pastWrap.hidden;
-            return;
-          }
-          pastWrap.hidden = false;
-          period = older[older.length - 1]; /* the most recent of the old ones */
+          if(onPast) return;                                  /* already there */
+          period = (lastPast != null && lastPast < latest)
+            ? lastPast
+            : older[older.length - 1];                        /* most recent old month */
         } else {
-          if(period === d.idx){ return; }
+          if(period === d.idx) return;
           period = d.idx;
-          pastWrap.hidden = true;
         }
         refreshPeriodUI();
       });
       wrap.appendChild(b);
     });
 
-    /* fill the dropdown */
     sel.innerHTML = "";
     older.forEach(function(i){
       const o = document.createElement("option");
@@ -2452,8 +2470,7 @@ const FALLBACK = [
       if(i === period) o.selected = true;
       sel.appendChild(o);
     });
-    if(!older.length) pastWrap.hidden = true;
-    if(!onPast && !older.length) pastWrap.hidden = true;
+    sel.classList.toggle("show", !!(older.length && onPast));
   }
 
   function refreshPeriodUI(){
@@ -2465,6 +2482,7 @@ const FALLBACK = [
 
   $("#pastSelect").addEventListener("change", function(){
     period = Number(this.value);
+    lastPast = period;
     refreshPeriodUI();
   });
 
