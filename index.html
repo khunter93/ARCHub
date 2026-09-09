@@ -2113,8 +2113,8 @@ const FALLBACK = [
         clearTimeout(timer); done(); reject(new Error("could not load"));
       };
       el.src = "https://docs.google.com/spreadsheets/d/" + sheetId +
-               "/gviz/tq?sheet=" + encodeURIComponent(tabName) +
-               "&tqx=responseHandler:" + cb;
+               "/gviz/tq?tqx=responseHandler:" + cb +
+               (tabName ? "&sheet=" + encodeURIComponent(tabName) : "");
       document.body.appendChild(el);
     });
   }
@@ -2144,6 +2144,37 @@ const FALLBACK = [
     }).filter(function(x){ return x.agent; });
   }
 
+  /* Run arcSalesDiagnose() in the console to see what each tab did. */
+  async function arcSalesDiagnose(){
+    const id = SALES_SOURCE.sheetId;
+    console.log("Sheet id:", id);
+
+    try{
+      const first = await gvizTab(id, "");
+      const cols = (first.table.cols || []).map(function(c){ return c.label || c.id; });
+      console.log("Access OK. First tab answered. Its column labels:", cols);
+    }catch(e){
+      console.log("Access FAILED even for the default tab (" + e.message + ").");
+      console.log("That points at sharing, not tab names. The sheet needs Anyone with the link, Viewer.");
+      console.log("If your Workspace admin blocks that, link sharing outside the company may be turned off.");
+      return;
+    }
+
+    const names = MONTH_ORDER.map(function(n){ return n.charAt(0).toUpperCase() + n.slice(1); });
+    for(const name of names){
+      try{
+        const r = await gvizTab(id, name);
+        const cols = (r.table.cols || []).map(function(c){ return c.label || c.id; });
+        const rows = rowsFromGviz(r, name);
+        console.log(name + ": tab exists, " + rows.length + " agents. Columns:", cols);
+      }catch(e){
+        console.log(name + ": " + e.message);
+      }
+    }
+    console.log("A tab that exists but shows 0 agents means the headers are not where expected.");
+  }
+  window.arcSalesDiagnose = arcSalesDiagnose;
+
   async function loadSales(){
     if(!SALES_SOURCE.useSheet || !SALES_SOURCE.sheetId) return false;
     try{
@@ -2152,12 +2183,20 @@ const FALLBACK = [
       /* ask every month for itself; the ones that do not exist simply fail */
       const answers = await Promise.all(names.map(function(name){
         return gvizTab(SALES_SOURCE.sheetId, name)
-          .then(function(resp){ return rowsFromGviz(resp, name); })
-          .catch(function(){ return []; });
+          .then(function(resp){
+            const got = rowsFromGviz(resp, name);
+            if(!got.length){
+              const cols = (resp.table.cols || []).map(function(c){ return c.label || c.id; });
+              console.warn("Shows & Sales: tab \u201c" + name + "\u201d answered but gave no agents. Columns seen:", cols);
+            }
+            return got;
+          })
+          .catch(function(e){ return []; });
       }));
 
       const recs = answers.reduce(function(all, part){ return all.concat(part); }, []);
-      if(!recs.length) throw new Error("no month tabs returned any agents");
+      if(!recs.length) throw new Error(
+        "no month tabs returned any agents. Run arcSalesDiagnose() in this console to see why");
 
       PERIOD_LIST = periodsFromRows(recs);
       period = Math.max(0, PERIOD_LIST.length - 2);   /* newest month, not the total */
