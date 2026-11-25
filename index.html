@@ -371,6 +371,203 @@ mark{background:var(--amber);color:var(--amber-deep);border-radius:3px;padding:0
 }
 .linkcard:hover .linkcard-host{color:var(--accent-ink)}
 
+/* ============================================================
+   KPI RANKINGS
+   ============================================================ */
+.kpi{max-width:var(--maxw);margin:0 auto;padding:0 24px 96px}
+.kpinotice{
+  background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 34%,transparent);
+  border-radius:var(--r);padding:13px 17px;margin-bottom:22px;
+  font-size:14.5px;color:var(--warn);
+}
+.kpinotice strong{font-weight:600}
+
+.metricwrap{display:flex;justify-content:center;margin-bottom:10px;position:relative;z-index:20}
+.metricnote{
+  text-align:center;margin:0 0 26px;
+  font-size:14px;color:var(--slate);
+}
+
+/* score bands, by what the number means rather than by rank */
+.band-top  {--sc:#B8860B;--scbg:#F6EDD2}
+.band-high {--sc:#1F6B54;--scbg:#DFF0E7}
+.band-mid  {--sc:#0C6B66;--scbg:#DCEFEE}
+.band-low  {--sc:#4B6187;--scbg:#E7ECF6}
+.band-base {--sc:#6B7785;--scbg:#EAEDF1}
+[data-theme="dark"] .band-top  {--sc:#E8C86A;--scbg:#332B12}
+[data-theme="dark"] .band-high {--sc:#74CFB4;--scbg:#12302A}
+[data-theme="dark"] .band-mid  {--sc:#4FD1C5;--scbg:#10302F}
+[data-theme="dark"] .band-low  {--sc:#9CB6E6;--scbg:#17243A}
+[data-theme="dark"] .band-base {--sc:#9AA6B2;--scbg:#1E242A}
+
+/* movement against the month before */
+.kpidelta{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  letter-spacing:.02em;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:3px;
+}
+.kpidelta.up{color:#1F6B54}
+.kpidelta.down{color:#9B5A4A}
+.kpidelta.flat{color:var(--slate-2);font-weight:500}
+.kpidelta.none{display:none}
+[data-theme="dark"] .kpidelta.up{color:#74CFB4}
+[data-theme="dark"] .kpidelta.down{color:#E3A094}
+
+/* the ranking itself */
+.kpiboard{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);overflow:hidden;
+}
+.kpirow{
+  position:relative;display:grid;
+  grid-template-columns:24px minmax(0,1fr) 68px 140px 96px;
+  align-items:center;gap:12px;padding:0 20px;height:56px;
+  border-bottom:1px solid var(--line-soft);
+}
+.kpirow:last-child{border-bottom:0}
+.kpirow > *{position:relative;z-index:1}
+.kpirank,.kpist-rank{
+  display:grid;place-items:center;width:24px;height:24px;
+  border:1.5px solid transparent;border-radius:50%;
+  font-family:var(--mono);font-size:12px;font-weight:700;line-height:1;
+  color:var(--slate-2);font-variant-numeric:tabular-nums;
+}
+/* The ring is the medal and its colour says which place. Every rank sits in
+   the same box whether it has a ring or not, with the border merely turned
+   transparent, so a circled number and a bare one share a centre and the
+   column reads straight. */
+.kpirank.medal,.kpist-rank.medal{border-color:currentColor}
+.kpirank.m1,.kpist-rank.m1{color:#B8860B}
+.kpirank.m2,.kpist-rank.m2{color:#6E7A88}
+.kpirank.m3,.kpist-rank.m3{color:#9C6334}
+[data-theme="dark"] .kpirank.m1,[data-theme="dark"] .kpist-rank.m1{color:#E8C86A}
+[data-theme="dark"] .kpirank.m2,[data-theme="dark"] .kpist-rank.m2{color:#AEB9C6}
+[data-theme="dark"] .kpirank.m3,[data-theme="dark"] .kpist-rank.m3{color:#D59A6E}
+.kpimove{display:flex;justify-content:flex-start}
+.kpiname{font-weight:600;letter-spacing:-.006em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kpibar{height:8px;border-radius:999px;background:var(--line-soft);overflow:hidden}
+.kpibar span{
+  display:block;height:100%;border-radius:999px;background:var(--accent);
+  transition:width .42s cubic-bezier(.4,0,.2,1);
+}
+.kpirow .kpibar span{background:var(--sc,var(--accent))}
+.kpival{
+  text-align:right;font-family:var(--mono);font-size:14px;font-weight:700;
+  color:var(--ink);font-variant-numeric:tabular-nums;
+}
+.kpival small{font-weight:500;color:var(--slate-2);font-size:11px}
+
+/* Total score standings.
+   One bar per agent, and its length is the score itself out of 100 rather
+   than a share of the leader's, so a two point lead looks like a two point
+   lead. All of this view's weight goes on the leader's row, which is built
+   at roughly half again the height of the others. Nothing else is enlarged,
+   so first place is unmistakable at a glance. */
+.kpistand{
+  position:relative;display:grid;
+  grid-template-columns:24px minmax(0,1.1fr) minmax(0,2fr) 56px 84px 16px;
+  align-items:center;gap:14px;padding:0 20px;height:50px;
+  border-bottom:1px solid var(--line-soft);
+}
+.kpistand:last-child{border-bottom:0}
+.kpist-name{
+  min-width:0;font-family:var(--display);font-size:17px;font-weight:600;
+  letter-spacing:-.015em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.kpist-track{height:20px;border-radius:4px;background:var(--line-soft);overflow:hidden}
+.kpist-fill{
+  display:block;height:100%;border-radius:5px;background:var(--sc,var(--accent));
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.kpist-move{display:flex;justify-content:flex-start}
+.kpist-score{
+  text-align:right;font-family:var(--display);font-size:19px;font-weight:700;
+  color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+}
+.kpistand.lead{height:60px;background:var(--scbg);border-bottom-color:transparent}
+.kpistand.lead .kpist-name{font-size:23px;font-weight:700;letter-spacing:-.025em}
+.kpistand.lead .kpist-track{height:32px;border-radius:5px}
+.kpistand.lead .kpist-score{font-size:27px}
+.kpistand{cursor:pointer}
+.kpistand:hover{background:color-mix(in srgb,var(--sc,var(--accent)) 7%,transparent)}
+.kpistand.lead:hover{background:var(--scbg)}
+.kpistand:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+/* An open row takes the panel's background so the two read as one block. */
+.kpistand:not(.lead)[aria-expanded="true"],
+.kpistand:not(.lead)[aria-expanded="true"]:hover{background:var(--paper)}
+.kpist-caret{width:16px;height:16px;color:var(--slate-2);transition:transform .25s ease}
+.kpistand[aria-expanded="true"] .kpist-caret{transform:rotate(90deg)}
+
+/* The panel animates on grid-template-rows, which is the one way to move
+   between nothing and the content's own height without measuring it. */
+.kpidetail{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .3s cubic-bezier(.4,0,.2,1);
+  background:var(--paper);
+}
+/* The closing line is a shadow, not a border, so a shut panel is truly zero
+   high and twenty-odd of them add nothing to the board. */
+.kpidetail.open{grid-template-rows:1fr;box-shadow:inset 0 -1px 0 var(--line-soft)}
+.kpid-clip{overflow:hidden}
+.kpid-body{padding:16px 20px 18px 48px}
+.kpid-head{
+  display:flex;flex-wrap:wrap;gap:6px 22px;margin-bottom:14px;
+  font-size:13px;color:var(--ink-2);
+}
+.kpid-head b{font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink)}
+.kpid-step{
+  display:grid;grid-template-columns:118px 84px minmax(0,1fr);
+  align-items:center;gap:14px;height:30px;
+}
+.kpid-name{font-size:13px;color:var(--ink-2)}
+.kpid-count{
+  font-family:var(--mono);font-size:13px;font-weight:700;text-align:right;
+  font-variant-numeric:tabular-nums;color:var(--ink);
+}
+.kpid-bar{position:relative;height:8px;border-radius:4px;background:var(--line-soft)}
+.kpid-bar.is-empty{background:transparent}
+.kpid-fill{
+  position:absolute;inset:0 auto 0 0;border-radius:4px;
+  background:var(--sc,var(--accent));opacity:.85;
+}
+.kpid-tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink-2);opacity:.55;border-radius:1px}
+.kpid-best{
+  margin:16px 0 0;padding:11px 15px;border-radius:9px;
+  border-left:3px solid var(--sc,var(--accent));background:var(--scbg);
+}
+.kpid-best-tag{
+  display:block;font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--sc,var(--accent));
+  margin-bottom:4px;
+}
+.kpid-best-main{
+  font-family:var(--display);font-size:18px;font-weight:700;
+  letter-spacing:-.02em;color:var(--ink);
+}
+.kpid-best-main em{font-style:normal;color:var(--sc,var(--accent))}
+.kpid-best-sub{display:block;font-size:12.5px;color:var(--ink-2);margin-top:3px}
+@media (max-width:760px){
+  .kpid-body{padding:14px 14px 16px}
+  .kpid-step{grid-template-columns:98px 68px minmax(0,1fr);gap:9px;height:28px}
+}
+@media (prefers-reduced-motion:reduce){
+  .kpist-fill,.kpidetail,.kpist-caret{transition:none}
+}
+
+@media (max-width:760px){
+  .kpistand{grid-template-columns:24px minmax(0,1fr) 50px 64px 16px;gap:10px;padding:0 14px}
+  .kpist-track{display:none}
+  .kpistand.lead{height:62px}
+  .kpistand.lead .kpist-name{font-size:20px}
+  .kpistand.lead .kpist-score{font-size:23px}
+}
+
+@media (max-width:760px){
+  .kpi{padding-left:20px;padding-right:20px}
+  .kpirow{grid-template-columns:24px minmax(0,1fr) 58px 76px;gap:8px;padding:0 14px}
+  .kpibar{display:none}
+}
+
 /* shows & sales leaderboard */
 .salesnotice{
   background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 34%,transparent);
@@ -1161,6 +1358,41 @@ footer.foot{border-top:1px solid var(--line-soft);padding:26px 24px 40px}
 
 <section class="links" id="linksPanel" hidden></section>
 
+<section class="kpi" id="kpiPanel" hidden>
+  <div class="kpinotice" id="kpiNotice" hidden></div>
+  <div class="periodwrap">
+    <div class="periodrow">
+      <div class="periodtoggle noanim" id="kpiToggle" role="group" aria-label="Month">
+        <span class="periodslide" id="kpiSlide" aria-hidden="true"></span>
+      </div>
+      <div class="monthpick" id="kpiPick">
+        <button class="monthpick-btn" type="button" id="kpiPickBtn" aria-haspopup="listbox" aria-expanded="false">
+          <span id="kpiPickLabel">Month</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="monthpick-menu" id="kpiPickMenu" role="listbox" aria-label="Choose a month"></div>
+      </div>
+    </div>
+  </div>
+  <div class="metricwrap">
+    <div class="periodrow">
+      <div class="periodtoggle noanim" id="metricRow" role="group" aria-label="What to rank by">
+        <span class="periodslide" id="metricSlide" aria-hidden="true"></span>
+      </div>
+      <div class="monthpick" id="measurePick">
+        <button class="monthpick-btn" type="button" id="measurePickBtn" aria-haspopup="listbox" aria-expanded="false">
+          <span id="measurePickLabel">Measure</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="monthpick-menu" id="measurePickMenu" role="listbox" aria-label="Choose a measure"></div>
+      </div>
+    </div>
+  </div>
+  <p class="metricnote" id="metricNote"></p>
+  <div class="kpiboard" id="kpiBoard"></div>
+  <p class="boardnote" id="kpiFoot"></p>
+</section>
+
 <section class="shows" id="showsPanel" hidden>
   <div class="salesnotice" id="salesNotice" hidden></div>
   <div class="periodwrap">
@@ -1618,6 +1850,66 @@ const SHIFT_MEANINGS = {
 };
 
 /* ==========================================================================
+   2d-7. KPI
+
+   SAMPLE DATA so the layout can be judged. Replace with the real figures when
+   the KPI sheet is ready. Agents book appointments, the dealership closes the
+   sale, so nothing here ranks anyone on sales.
+
+   Each agent needs: hours worked, calls made, appointments booked, and how
+   many of those appointments showed up.
+   ========================================================================== */
+/* Read from the ARC KPI sheet, one tab per month named January .. December.
+
+   Deliberately uses Total Score (column B) and the raw rates, never the
+   Points columns: those changed formula partway through the year, so they
+   are not comparable month to month. */
+const KPI_SOURCE = {
+  useSheet: true,
+  sheetId:  "1xeYMzcqEWqvqffU2AiCEzR5IE01p8G8wYwTE9zmrC90"
+};
+
+/* Shown only if the sheet cannot be reached, so the page is never blank. */
+const KPI_FALLBACK = [
+  { name:"Rachel",  score:99, hours:248,    calls:15220, cph:61, convos:3613, convoPct:24, leads:566, leadsPct:16, appts:431, apptPct:12, hr:135, hrPct:4,  shows:108, showPct:19, sales:24, salesPct:22 },
+  { name:"Carolyn", score:87, hours:180.08, calls:11740, cph:65, convos:3049, convoPct:26, leads:470, leadsPct:14, appts:348, apptPct:11, hr:91,  hrPct:3,  shows:74,  showPct:17, sales:16, salesPct:22 },
+  { name:"Monique", score:84, hours:212,    calls:12214, cph:58, convos:2321, convoPct:19, leads:502, leadsPct:16, appts:386, apptPct:17, hr:136, hrPct:6,  shows:55,  showPct:11, sales:11, salesPct:20 },
+  { name:"Caolan",  score:83, hours:175.42, calls:11550, cph:66, convos:3003, convoPct:26, leads:712, leadsPct:24, appts:209, apptPct:7,  hr:503, hrPct:17, shows:60,  showPct:8, sales:13, salesPct:22 },
+  { name:"Sharon",  score:79, hours:179.08, calls:11670, cph:65, convos:2451, convoPct:21, leads:804, leadsPct:33, appts:160, apptPct:6,  hr:644, hrPct:26, shows:61,  showPct:8, sales:12, salesPct:20 }
+];
+
+/* The rankings people can switch between. Higher is always better. */
+const KPI_METRICS = [
+  { id:"score",  label:"Total score", unit:"",    dp:0,
+    note:"",
+    value:function(a){ return a.score; } },
+  { id:"cph",    label:"Calls per hour", unit:"", dp:0,
+    note:"Calls made for each hour on the phones.",
+    value:function(a){ return a.cph; } },
+  { id:"convo",  label:"Conversation rate", unit:"%", dp:0,
+    note:"Share of calls that became a conversation.",
+    value:function(a){ return a.convoPct; } },
+  { id:"appt",   label:"Appointment rate", unit:"%", dp:0,
+    note:"Share of conversations that became an appointment.",
+    value:function(a){ return a.apptPct; } },
+  { id:"hr",     label:"Hand raiser rate", unit:"%", dp:0,
+    note:"Share of conversations that became a hand raiser.",
+    value:function(a){ return a.hrPct; } },
+  { id:"show",   label:"Show rate", unit:"%", dp:0,
+    note:"Share of appointments that turned up.",
+    value:function(a){ return a.showPct; } },
+  { id:"appts",  label:"Appointments", unit:"", dp:0,
+    note:"Appointments booked.",
+    value:function(a){ return a.appts; } },
+  { id:"shows",  label:"Shows", unit:"", dp:0,
+    note:"Appointments that turned up.",
+    value:function(a){ return a.shows; } },
+  { id:"hours",  label:"Hours", unit:" hrs", dp:0,
+    note:"Hours on the phones.",
+    value:function(a){ return a.hours; } }
+];
+
+/* ==========================================================================
    2e. MENU SECTIONS
 
    Everything in the sidebar, in order. A section is one of three kinds:
@@ -1633,6 +1925,11 @@ const SECTIONS = [
     eyebrow:"This month",
     title:"Shows & Sales",
     lede:"Where everyone stands this month. Sort by any column to see who is leading on volume, on closing, or on bonus earned." },
+  { id:"kpi", label:"KPI", ready:true, view:"kpi", wip:true,
+    icon:'<path d="M4 19.5h16"/><path d="M7.5 19.5v-6M12 19.5V7M16.5 19.5v-9"/><circle cx="7.5" cy="11" r="1.4"/><circle cx="12" cy="4.6" r="1.4"/><circle cx="16.5" cy="8" r="1.4"/>',
+    eyebrow:"How the team is doing",
+    title:"KPI",
+    lede:"Where everyone stands, and how they moved since last month." },
   { id:"schedule", label:"Schedule", ready:true, view:"schedule",
     icon:'<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3"/>',
     eyebrow:"Who is on when",
@@ -2474,47 +2771,108 @@ const FALLBACK = [
       return;
     }
 
+    const year  = new Date().getFullYear();
     const names = MONTH_ORDER.map(function(n){ return n.charAt(0).toUpperCase() + n.slice(1); });
+    const prints = {};
+
     for(const name of names){
-      try{
-        const r = await gvizTab(id, name);
-        const cols = (r.table.cols || []).map(function(c){ return c.label || c.id; });
-        const rows = rowsFromGviz(r, name);
-        console.log(name + ": tab exists, " + rows.length + " agents. Columns:", cols);
-      }catch(e){
-        console.log(name + ": " + e.message);
+      const tried = salesTabNames(name, year);
+      let hit = null;
+      for(const tab of tried){
+        try{
+          const r = await gvizTab(id, tab);
+          const rows = rowsFromGviz(r, name);
+          if(rows.length){
+            hit = { tab:tab, rows:rows,
+                    cols:(r.table.cols || []).map(function(c){ return c.label || c.id; }) };
+            break;
+          }
+          if(!hit) hit = { tab:tab, rows:[], cols:null, empty:true };
+        }catch(e){ /* keep trying spellings */ }
+      }
+      if(!hit){
+        console.log(name + ": no tab answered under any of " + tried.join(", "));
+      } else if(hit.empty){
+        console.log(name + ": tab “" + hit.tab + "” answered but held no agents, " +
+                    "so its headers are not where expected.");
+      } else {
+        const print = salesPrint(hit.rows);
+        const dupe  = prints[print];
+        prints[print] = prints[print] || name;
+        console.log(name + ": read from tab “" + hit.tab + "”, " +
+                    hit.rows.length + " agents." +
+                    (dupe ? " IDENTICAL to " + dupe + ", so this tab does not exist and " +
+                            "Google served another one. It is dropped." : ""),
+                    hit.cols);
       }
     }
-    console.log("A tab that exists but shows 0 agents means the headers are not where expected.");
+    console.log("Months listed as dropped are normal for months that have not happened yet.");
   }
   window.arcSalesDiagnose = arcSalesDiagnose;
+
+  /* Tabs get renamed. "November" becomes "November 2026", or someone shortens
+     it to "Nov". Asking for a few spellings costs nothing, because a name that
+     does not exist answers straight away rather than hanging. */
+  function salesTabNames(name, year){
+    const short = name.slice(0, 3);
+    return [name, name + " " + year, short, short + " " + year];
+  }
+
+  /* A payload fingerprint, used only to spot the same tab arriving twice. */
+  function salesPrint(rows){
+    return rows.map(function(r){
+      return r.agent + "|" + r.shows + "|" + r.sales + "|" + r.bonus;
+    }).join(";");
+  }
+
+  async function salesMonth(name, year){
+    const tried = salesTabNames(name, year);
+    for(const tab of tried){
+      try{
+        const resp = await gvizTab(SALES_SOURCE.sheetId, tab);
+        const got = rowsFromGviz(resp, name);
+        if(got.length) return { rows:got, tab:tab };
+      }catch(e){ /* no tab by that name, try the next spelling */ }
+    }
+    return { rows:[], tab:null };
+  }
 
   async function loadSales(){
     if(!SALES_SOURCE.useSheet || !SALES_SOURCE.sheetId) return false;
     try{
+      /* One probe before anything else. If the sheet will not answer at all
+         the cause is its sharing, and saying so now beats waiting out a
+         timeout for every month and every spelling first. */
+      try{
+        await gvizTab(SALES_SOURCE.sheetId, "");
+      }catch(e){
+        throw new Error("the sheet would not answer at all (" + e.message +
+          "), which points at its sharing rather than its tab names. " +
+          "Run arcSalesDiagnose() in this console for the detail");
+      }
+
+      const year  = new Date().getFullYear();
       const names = MONTH_ORDER.map(function(n){ return n.charAt(0).toUpperCase() + n.slice(1); });
 
-      /* ask every month for itself; the ones that do not exist simply fail */
       const answers = await Promise.all(names.map(function(name){
-        return gvizTab(SALES_SOURCE.sheetId, name)
-          .then(function(resp){
-            const got = rowsFromGviz(resp, name);
-            if(!got.length){
-              const preview = (resp.table.rows || []).slice(0, 6).map(function(r){
-                return (r.c || []).slice(0, 8).map(function(c){
-                  return c ? (c.v != null ? c.v : c.f) : null;
-                });
-              });
-              console.warn("Shows & Sales: tab \u201c" + name + "\u201d gave no agents. First rows as received:", preview);
-            }
-            return got;
-          })
-          .catch(function(e){ return []; });
+        return salesMonth(name, year);
       }));
 
-      const recs = answers.reduce(function(all, part){ return all.concat(part); }, []);
+      /* Google answers a request for a tab that does not exist with whichever
+         sheet comes first in the file, rather than with an error, so one
+         month's rows can come back under several months. An identical payload
+         after the first is that, not real data. */
+      const seen = {}, recs = [];
+      answers.forEach(function(a){
+        if(!a.rows.length) return;
+        const print = salesPrint(a.rows);
+        if(seen[print]) return;
+        seen[print] = true;
+        recs.push.apply(recs, a.rows);
+      });
+
       if(!recs.length) throw new Error(
-        "no month tabs returned any agents. Run arcSalesDiagnose() in this console to see why");
+        "the sheet answered but no tab held any agents. Run arcSalesDiagnose() in this console to see why");
 
       PERIOD_LIST = periodsFromRows(recs);
       period = Math.max(0, PERIOD_LIST.length - 2);   /* newest month, not the total */
@@ -2639,9 +2997,9 @@ const FALLBACK = [
     } else {
       notice.hidden = false;
       notice.innerHTML = SALES_SOURCE.useSheet
-        ? "<strong>These are sample numbers, not your sheet.</strong> The usual cause is the sheet's " +
-          "sharing: it needs <em>Anyone with the link, Viewer</em>. Opening this file from your computer " +
-          "rather than the website will also do it."
+        ? "<strong>Could not read the Shows &amp; Sales sheet, these are sample numbers.</strong> " +
+          "The usual cause is the sheet's sharing: it needs <em>Anyone with the link, Viewer</em>. " +
+          "Run <code>arcSalesDiagnose()</code> in the browser console for the detail."
         : "<strong>Sample data.</strong> Set <code>useSheet: true</code> in the script to read the live sheet.";
     }
     $("#boardNote").textContent =
@@ -3425,6 +3783,691 @@ const FALLBACK = [
     buildSchedule();
   });
 
+  /* ---------- kpi rankings ---------- */
+  /* Total score stands on its own. The parts behind it sit in a picker, so
+     the headline number is never one of nine equal buttons. */
+  let onScore = true, measureIdx = 0, lastMeasure = 0;
+  function activeMetric(){
+    return onScore ? KPI_METRICS[0] : (KPI_METRICS[measureIdx + 1] || KPI_METRICS[1]);
+  }
+  let KPI_MONTHS = [];          /* [{ label, agents }] oldest first */
+  let kpiIdx = 0, kpiLastPast = null, kpiReady = false, kpiLive = false;
+
+  const KPI_GROUPS = {
+    calls:"calls made", convos:"conversations", leads:"leads generated",
+    appts:"appointments", hr:"hand raisers", shows:"shows", sales:"sales"
+  };
+
+  function kpiPct(v){
+    const t = String(v == null ? "" : v).trim();
+    if(t.indexOf("%") > -1) return num(t);
+    const n = num(t);
+    return (n > 0 && n <= 1) ? n * 100 : n;     /* a rate stored as a fraction */
+  }
+
+  /* Column positions when the header rows are missing. Verified against every
+     2026 month tab: Agent, Total Score, Hours, then each group as count, rate
+     and sometimes a points column. */
+  const KPI_FIXED = { score:1, hours:2, calls:3, cph:4, convos:6, convoPct:7,
+                      leads:9, leadsPct:10, appts:11, apptPct:12, hr:14, hrPct:15,
+                      shows:19, showPct:20, sales:22, salesPct:23 };
+
+  /* The month tabs are a report, not a table: a group row (Calls Made,
+     Conversations, ...) sits above the real header row that starts with Agent.
+     gviz does not always hand back those top rows, so fall back in stages. */
+  function kpiColumns(grid){
+    const low = function(r){
+      return (r || []).map(function(c){ return String(c == null ? "" : c).trim().toLowerCase(); });
+    };
+    const at = function(row, name){
+      return row.findIndex(function(c){ return c === name; });
+    };
+
+    /* the row that starts the data, and the two header rows if they came back */
+    let hi = -1;
+    for(let i = 0; i < grid.length; i++){
+      if(low(grid[i]).some(function(c){ return c === "agent"; })){ hi = i; break; }
+    }
+
+    if(hi >= 0){
+      const h = low(grid[hi]);
+      const agent = at(h, "agent");
+      const col = { agent:agent, score:at(h, "total score"), hours:at(h, "hours") };
+
+      /* prefer the group row above, it names each block unambiguously */
+      let gi = -1;
+      for(let i = hi - 1; i >= 0 && i >= hi - 3; i--){
+        if(low(grid[i]).some(function(c){ return c === "calls made"; })){ gi = i; break; }
+      }
+      if(gi >= 0){
+        const g = low(grid[gi]);
+        Object.keys(KPI_GROUPS).forEach(function(k){
+          const i = at(g, KPI_GROUPS[k]);
+          col[k] = i;
+          col[k + "Rate"] = i >= 0 ? i + 1 : -1;
+        });
+        col.cph = col.calls >= 0 ? col.calls + 1 : -1;
+      } else {
+        /* no group row, so lay the known offsets out from the Agent column */
+        Object.keys(KPI_FIXED).forEach(function(k){ col[k] = agent + KPI_FIXED[k]; });
+        col.convosRate = col.convoPct; col.apptsRate = col.apptPct;
+        col.hrRate = col.hrPct; col.showsRate = col.showPct;
+        col.leadsRate = col.leadsPct; col.salesRate = col.salesPct;
+      }
+      if(col.score < 0) col.score = agent + KPI_FIXED.score;
+      if(col.hours < 0) col.hours = agent + KPI_FIXED.hours;
+      return { col:col, start:hi + 1 };
+    }
+
+    /* no header rows at all: gviz stripped them, so the grid is pure data */
+    const first = grid.findIndex(function(r){
+      return r && String(r[0] == null ? "" : r[0]).trim() &&
+             (num(r[KPI_FIXED.hours]) || num(r[KPI_FIXED.calls]));
+    });
+    if(first < 0) return null;
+    const col = { agent:0 };
+    Object.keys(KPI_FIXED).forEach(function(k){ col[k] = KPI_FIXED[k]; });
+    col.convosRate = col.convoPct; col.apptsRate = col.apptPct;
+    col.hrRate = col.hrPct; col.showsRate = col.showPct;
+    return { col:col, start:first };
+  }
+
+  function kpiTabIsMonth(resp, monthName){
+    const want = String(monthName || "").trim().toLowerCase();
+    if(!want) return true;
+    const seen = [];
+    ((resp.table && resp.table.cols) || []).forEach(function(c){
+      seen.push(String(c.label == null ? "" : c.label).trim().toLowerCase());
+    });
+    ((resp.table && resp.table.rows) || []).slice(0, 4).forEach(function(r){
+      (r.c || []).forEach(function(c){
+        if(c) seen.push(String(c.f != null ? c.f : c.v).trim().toLowerCase());
+      });
+    });
+    return seen.some(function(t){ return t === want || t.indexOf(want) === 0; });
+  }
+
+  function parseKpiTab(resp, monthName){
+    if(!kpiTabIsMonth(resp, monthName)) return [];
+    const grid = ((resp.table && resp.table.rows) || []).map(function(r){
+      return (r.c || []).map(function(c){
+        if(!c) return null;
+        return c.f != null ? c.f : c.v;
+      });
+    });
+    const found = kpiColumns(grid);
+    if(!found) return [];
+    const col = found.col;
+
+    const cell = function(r, i){ return (i != null && i >= 0) ? r[i] : null; };
+    const out = [];
+    for(let i = found.start; i < grid.length; i++){
+      const r = grid[i];
+      if(!r) continue;
+      const name = String(cell(r, col.agent) == null ? "" : cell(r, col.agent)).trim();
+      if(!name) continue;
+      const ln = name.toLowerCase();
+      if(ln === "agent" || ln === "total") continue;
+
+      const rec = {
+        name:     name,
+        score:    num(cell(r, col.score)),
+        hours:    num(cell(r, col.hours)),
+        calls:    num(cell(r, col.calls)),
+        cph:      num(cell(r, col.cph)),
+        convos:   num(cell(r, col.convos)),
+        convoPct: kpiPct(cell(r, col.convosRate != null ? col.convosRate : col.convoPct)),
+        leads:    num(cell(r, col.leads)),
+        leadsPct: kpiPct(cell(r, col.leadsRate != null ? col.leadsRate : col.leadsPct)),
+        appts:    num(cell(r, col.appts)),
+        apptPct:  kpiPct(cell(r, col.apptsRate != null ? col.apptsRate : col.apptPct)),
+        hr:       num(cell(r, col.hr)),
+        hrPct:    kpiPct(cell(r, col.hrRate != null ? col.hrRate : col.hrPct)),
+        shows:    num(cell(r, col.shows)),
+        showPct:  kpiPct(cell(r, col.showsRate != null ? col.showsRate : col.showPct)),
+        sales:    num(cell(r, col.sales)),
+        salesPct: kpiPct(cell(r, col.salesRate != null ? col.salesRate : col.salesPct))
+      };
+      if(!rec.hours && !rec.calls) continue;      /* did not work that month */
+      out.push(rec);
+    }
+    return out;
+  }
+
+  async function loadKpi(){
+    if(!KPI_SOURCE.useSheet || !KPI_SOURCE.sheetId) return false;
+    try{
+      const names = MONTH_ORDER.map(function(n){ return n.charAt(0).toUpperCase() + n.slice(1); });
+      const got = await Promise.all(names.map(function(name){
+        return gvizTab(KPI_SOURCE.sheetId, name, 0)
+          .then(function(resp){ return { label:name, agents:parseKpiTab(resp, name) }; })
+          .catch(function(){ return null; });
+      }));
+      const months = got.filter(function(m){ return m && m.agents.length; });
+      if(!months.length) throw new Error("no month tabs returned any agents");
+
+      KPI_MONTHS = months; KPI_YTD_CACHE = null;
+      kpiIdx = months.length - 1;                 /* newest month with data */
+      kpiLive = true;
+      return true;
+    }catch(err){
+      console.warn("KPI sheet:", err.message + ". Run arcKpiDiagnose() in this console to see why");
+      KPI_MONTHS = [{ label:"Sample", agents:KPI_FALLBACK }]; KPI_YTD_CACHE = null;
+      kpiIdx = 0;
+      return false;
+    }
+  }
+
+  async function arcKpiDiagnose(){
+    const names = MONTH_ORDER.map(function(n){ return n.charAt(0).toUpperCase() + n.slice(1); });
+    for(const name of names){
+      try{
+        const resp = await gvizTab(KPI_SOURCE.sheetId, name, 0);
+        const rows = parseKpiTab(resp, name);
+        const right = kpiTabIsMonth(resp, name);
+        console.log(name + ": " + (right ? "tab found" : "NOT this month's tab, Google sent a default sheet") +
+                    ", " + rows.length + " agents.");
+        if(!rows.length){
+          const grid = ((resp.table && resp.table.rows) || []).slice(0, 5).map(function(r){
+            return (r.c || []).slice(0, 14).map(function(c){ return c ? (c.f != null ? c.f : c.v) : null; });
+          });
+          console.log("   column labels: " + JSON.stringify(
+            ((resp.table && resp.table.cols) || []).slice(0, 14).map(function(c){ return c.label; })));
+          console.log("   rows returned: " + ((resp.table && resp.table.rows) || []).length);
+          grid.forEach(function(r, n){ console.log("   row " + n + ": " + JSON.stringify(r)); });
+        }
+      }catch(e){
+        console.log(name + ": " + e.message);
+      }
+    }
+    console.log("A tab that exists with 0 agents means the header rows are not where expected.");
+  }
+  window.arcKpiDiagnose = arcKpiDiagnose;
+
+  function buildMetricButtons(){
+    const wrap = $("#metricRow");
+    wrap.querySelectorAll("button").forEach(function(b){ b.remove(); });
+
+    const defs = [
+      { kind:"score",   label:KPI_METRICS[0].label },
+      { kind:"measure", label:"By measure" }
+    ];
+    defs.forEach(function(d){
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = d.label;
+      b.setAttribute("aria-pressed", String(d.kind === "score" ? onScore : !onScore));
+      b.addEventListener("click", function(){
+        if(d.kind === "score"){
+          if(onScore) return;
+          onScore = true;
+        } else {
+          if(!onScore) return;
+          onScore = false;
+          measureIdx = lastMeasure;
+        }
+        refreshMetric();
+      });
+      wrap.appendChild(b);
+    });
+
+    const pick = $("#measurePick"), menu = $("#measurePickMenu");
+    menu.innerHTML = "";
+    KPI_METRICS.slice(1).forEach(function(m, i){
+      const o = document.createElement("button");
+      o.className = "monthpick-opt";
+      o.type = "button";
+      o.setAttribute("role", "option");
+      o.setAttribute("aria-selected", String(!onScore && i === measureIdx));
+      o.textContent = m.label;
+      o.addEventListener("click", function(){
+        measureIdx = i; lastMeasure = i; onScore = false;
+        closeMeasurePick();
+        refreshMetric();
+      });
+      menu.appendChild(o);
+    });
+    $("#measurePickLabel").textContent = onScore ? "Measure" : activeMetric().label;
+    pick.classList.toggle("show", !onScore);
+    if(onScore) closeMeasurePick();
+  }
+
+  function moveMetricPill(){
+    const wrap = $("#metricRow"), pill = $("#metricSlide");
+    const on = wrap.querySelector('button[aria-pressed="true"]');
+    if(!on || !on.offsetWidth) return;
+    pill.style.width = on.offsetWidth + "px";
+    pill.style.transform = "translateX(" + (on.offsetLeft - 3) + "px)";
+    if(wrap.classList.contains("noanim")){
+      requestAnimationFrame(function(){ wrap.classList.remove("noanim"); });
+    }
+  }
+
+  function closeMeasurePick(){
+    $("#measurePick").classList.remove("open");
+    $("#measurePickBtn").setAttribute("aria-expanded", "false");
+  }
+  $("#measurePickBtn").addEventListener("click", function(e){
+    e.stopPropagation();
+    const open = $("#measurePick").classList.toggle("open");
+    this.setAttribute("aria-expanded", String(open));
+  });
+  document.addEventListener("click", function(e){
+    if(!$("#measurePick").contains(e.target)) closeMeasurePick();
+  });
+
+  function refreshMetric(){
+    buildMetricButtons();
+    moveMetricPill();
+    buildKpi();
+  }
+
+  /* Year to date is an average of each agent's months, not a total. The
+     sheet's score is already out of 100 for one month, so adding months
+     together would mean nothing, and the average is their typical month.
+     Raw counts are the exception: appointments, shows and hours do add up,
+     and calls per hour is rebuilt from those totals rather than averaged,
+     so a heavy month carries the weight it should. */
+  const KPI_YTD = -1;
+  const KPI_SUMS = { appts:1, shows:1, hours:1, calls:1, hr:1, convos:1, leads:1, sales:1 };
+  /* Agent fields and metric ids overlap but do not mean the same thing: the
+     field "hr" is the hand raiser count, the metric "hr" is the rate. Keep
+     the note's lookup separate so a rate is never described as a total. */
+  const KPI_TOTALLED = { appts:1, shows:1, hours:1 };
+  let KPI_YTD_CACHE = null;
+
+  function kpiYtd(){
+    const by = {};
+    KPI_MONTHS.forEach(function(mo){
+      (mo.agents || []).forEach(function(a){
+        const rec = by[a.name] || (by[a.name] = { n:0, acc:{} });
+        rec.n++;
+        Object.keys(a).forEach(function(k){
+          if(k === "name") return;
+          const v = Number(a[k]);
+          if(isFinite(v)) rec.acc[k] = (rec.acc[k] || 0) + v;
+        });
+      });
+    });
+    const agents = Object.keys(by).map(function(name){
+      const rec = by[name], out = { name:name, months:rec.n };
+      Object.keys(rec.acc).forEach(function(k){
+        out[k] = KPI_SUMS[k] ? rec.acc[k] : rec.acc[k] / rec.n;
+      });
+      if(out.hours) out.cph = out.calls / out.hours;
+      return out;
+    });
+    return { label:"Year to date", agents:agents, ytd:true };
+  }
+
+  function kpiMonth(){
+    if(kpiIdx === KPI_YTD){
+      if(!KPI_YTD_CACHE) KPI_YTD_CACHE = kpiYtd();
+      return KPI_YTD_CACHE;
+    }
+    return KPI_MONTHS[kpiIdx] || KPI_MONTHS[0] || { label:"", agents:[] };
+  }
+
+  /* Three fixed choices, newest month, the one before it, and a picker for
+     anything older, so the buttons never move as months are added. */
+  function buildKpiMonths(){
+    const wrap = $("#kpiToggle");
+    wrap.querySelectorAll("button").forEach(function(b){ b.remove(); });
+
+    const last = KPI_MONTHS.length - 1;
+    const older = [];
+    for(let i = 0; i < last; i++) older.push(i);
+    const onPast = kpiIdx >= 0 && kpiIdx < last;
+
+    const defs = [{ kind:"latest", label:(KPI_MONTHS[last] || {}).label || "Latest", idx:last }];
+    if(KPI_MONTHS.length > 1) defs.push({ kind:"ytd", label:"Year to date" });
+    if(older.length) defs.push({ kind:"past", label:"Past months" });
+
+    defs.forEach(function(d){
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = d.label;
+      b.setAttribute("aria-pressed", String(
+        d.kind === "past" ? onPast :
+        d.kind === "ytd"  ? kpiIdx === KPI_YTD :
+                            kpiIdx === d.idx));
+      b.addEventListener("click", function(){
+        if(d.kind === "past"){
+          if(onPast) return;
+          kpiIdx = (kpiLastPast != null && kpiLastPast < last) ? kpiLastPast : older[older.length - 1];
+        } else if(d.kind === "ytd"){
+          if(kpiIdx === KPI_YTD) return;
+          kpiIdx = KPI_YTD;
+        } else {
+          if(kpiIdx === d.idx) return;
+          kpiIdx = d.idx;
+        }
+        refreshKpi();
+      });
+      wrap.appendChild(b);
+    });
+
+    const pick = $("#kpiPick"), menu = $("#kpiPickMenu");
+    menu.innerHTML = "";
+    older.forEach(function(i){
+      const o = document.createElement("button");
+      o.className = "monthpick-opt";
+      o.type = "button";
+      o.setAttribute("role", "option");
+      o.setAttribute("aria-selected", String(i === kpiIdx));
+      o.textContent = KPI_MONTHS[i].label;
+      o.addEventListener("click", function(){
+        kpiIdx = i; kpiLastPast = i;
+        closeKpiPick();
+        refreshKpi();
+      });
+      menu.appendChild(o);
+    });
+    $("#kpiPickLabel").textContent = onPast ? kpiMonth().label : "Month";
+    pick.classList.toggle("show", !!(older.length && onPast));
+    if(!onPast) closeKpiPick();
+  }
+
+  function moveKpiPill(){
+    const wrap = $("#kpiToggle"), pill = $("#kpiSlide");
+    const on = wrap.querySelector('button[aria-pressed="true"]');
+    if(!on || !on.offsetWidth) return;
+    pill.style.width = on.offsetWidth + "px";
+    pill.style.transform = "translateX(" + (on.offsetLeft - 3) + "px)";
+    if(wrap.classList.contains("noanim")){
+      requestAnimationFrame(function(){ wrap.classList.remove("noanim"); });
+    }
+  }
+
+  function closeKpiPick(){
+    $("#kpiPick").classList.remove("open");
+    $("#kpiPickBtn").setAttribute("aria-expanded", "false");
+  }
+  $("#kpiPickBtn").addEventListener("click", function(e){
+    e.stopPropagation();
+    const open = $("#kpiPick").classList.toggle("open");
+    this.setAttribute("aria-expanded", String(open));
+  });
+  document.addEventListener("click", function(e){
+    if(!$("#kpiPick").contains(e.target)) closeKpiPick();
+  });
+
+  function refreshKpi(){
+    buildKpiMonths();
+    moveKpiPill();
+    moveMetricPill();
+    buildKpi();
+  }
+
+  /* Bands describe the score itself, so someone on 72 keeps the same colour
+     whether that puts them second or tenth. */
+  function kpiBand(v){
+    if(v >= 85) return "band-top";
+    if(v >= 70) return "band-high";
+    if(v >= 55) return "band-mid";
+    if(v >= 40) return "band-low";
+    return "band-base";
+  }
+
+  function kpiDeltaEl(d, dp){
+    const el = document.createElement("span");
+    if(d === null){ el.className = "kpidelta none"; el.textContent = "\u2013"; return el; }
+    const r = Number(d.toFixed(dp || 0));
+    if(r > 0){ el.className = "kpidelta up";   el.textContent = "\u25B2 " + r; }
+    else if(r < 0){ el.className = "kpidelta down"; el.textContent = "\u25BC " + Math.abs(r); }
+    else { el.className = "kpidelta flat"; el.textContent = "\u2013"; }
+    return el;
+  }
+
+
+  /* The three things worth comparing against the rest of the team. Counts,
+     not rates, because "15,220 calls against an average of 11,400" is a
+     sentence anyone can read without being told how to read it. */
+  const KPI_BARS = [
+    { key:"calls",  label:"Calls made" },
+    { key:"convos", label:"Conversations" },
+    { key:"score",  label:"Total score" }
+  ];
+
+  /* Only the five categories the sheet scores can be a best category. Leads
+     Generated, Not Interested and Sales all have a percentage column but are
+     not scored, so none of them is in the running. Calls is judged on its
+     hourly rate rather than a percentage, which is why each entry names its
+     own rate and the plain noun for the count behind it. */
+  const KPI_CATS = [
+    { key:"cph",      num:"calls",  label:"Calls per hour", unit:"",  noun:"calls" },
+    { key:"convoPct", num:"convos", label:"Conversations",  unit:"%", noun:"conversations" },
+    { key:"apptPct",  num:"appts",  label:"Appointments",   unit:"%", noun:"appointments" },
+    { key:"hrPct",    num:"hr",     label:"Hand raisers",   unit:"%", noun:"hand raisers" },
+    { key:"showPct",  num:"shows",  label:"Shows",          unit:"%", noun:"shows" }
+  ];
+
+  function kpiCatVal(c, v){
+    return c.unit === "%" ? v.toFixed(0) + "%" : Math.round(v).toLocaleString();
+  }
+
+  function kpiSpread(agents){
+    const keys = {};
+    KPI_BARS.forEach(function(b){ keys[b.key] = 1; });
+    KPI_CATS.forEach(function(c){ keys[c.key] = 1; keys[c.num] = 1; });
+    const out = {};
+    Object.keys(keys).forEach(function(k){
+      const vals = agents.map(function(a){ return Number(a[k]) || 0; });
+      const sum = vals.reduce(function(t, v){ return t + v; }, 0);
+      out[k] = {
+        avg: vals.length ? sum / vals.length : 0,
+        max: vals.reduce(function(hi, v){ return v > hi ? v : hi; }, 0)
+      };
+    });
+    return out;
+  }
+
+  /* The category an agent stands furthest above the team on, by the ratio of
+     their rate to the team's average rate. Everyone has one, including someone
+     having a poor month, which is the whole point of showing it. */
+  function kpiBest(a, spread){
+    let best = null;
+    KPI_CATS.forEach(function(c){
+      const v = Number(a[c.key]), ctx = spread[c.key];
+      if(!isFinite(v) || v <= 0 || !ctx || ctx.avg <= 0) return;
+      const ratio = v / ctx.avg;
+      if(!best || ratio > best.ratio){
+        best = { cat:c, v:v, num:Number(a[c.num]) || 0, avg:ctx.avg, ratio:ratio };
+      }
+    });
+    return best;
+  }
+
+  function kpiPanel(a, spread){
+    const n = function(v){ return Math.round(Number(v) || 0).toLocaleString(); };
+
+    /* Leads generated and appointments are different columns on the sheet,
+       so both are shown under the sheet's own names rather than collapsed
+       into one word that could mean either. */
+    const stats = [
+      [n(a.cph),   "calls an hour"],
+      [n(a.leads), "leads generated"],
+      [n(a.shows), "showed"],
+      [n(a.sales), "bought"]
+    ];
+
+    const head = '<div class="kpid-head">' + stats.map(function(st){
+      return '<span><b>' + st[0] + '</b> ' + st[1] + '</span>';
+    }).join("") + '</div>';
+
+    const bars = KPI_BARS.map(function(bar){
+      const v = Number(a[bar.key]) || 0;
+      const ctx = spread[bar.key] || { avg:0, max:0 };
+      const w = ctx.max > 0 ? Math.max(2, v / ctx.max * 100) : 0;
+      const t = ctx.max > 0 ? Math.min(100, ctx.avg / ctx.max * 100) : 0;
+      return '<div class="kpid-step">' +
+               '<span class="kpid-name">' + bar.label + '</span>' +
+               '<span class="kpid-count">' + n(v) + '</span>' +
+               '<span class="kpid-bar">' +
+                 '<span class="kpid-fill" style="width:' + w.toFixed(1) + '%"></span>' +
+                 '<span class="kpid-tick" style="left:' + t.toFixed(1) + '%"></span>' +
+               '</span>' +
+             '</div>';
+    }).join("");
+
+    let best = "";
+    const b = kpiBest(a, spread);
+    if(b){
+      best = '<div class="kpid-best">' +
+               '<span class="kpid-best-tag">Best category</span>' +
+               '<span class="kpid-best-main">' + b.cat.label +
+                 ' <em>' + kpiCatVal(b.cat, b.v) + '</em></span>' +
+               '<span class="kpid-best-sub">' + n(b.num) + ' ' + b.cat.noun + '</span>' +
+             '</div>';
+    }
+
+    return head + '<div class="kpid-funnel">' + bars + '</div>' + best;
+  }
+
+  /* The standings.
+     Equal scores share a rank and the next rank skips, the way standings
+     work everywhere, so two agents on the same number cannot end up with one
+     holding a medal and the other not. Places are compared on the number as
+     it is displayed, so the board never contradicts what you can read on it. */
+  function buildStandings(rows, m){
+    const board = $("#kpiBoard");
+    const spread = kpiSpread(rows.map(function(r){ return r.a; }));
+    let rank = 0, seen = null;
+    rows.forEach(function(r, i){
+      const shown = r.v.toFixed(0);
+      if(seen === null || shown !== seen){ rank = i + 1; seen = shown; }
+      const el = document.createElement("div");
+      el.className = "kpistand " + kpiBand(r.v) + (rank === 1 ? " lead" : "");
+      el.innerHTML =
+        '<span class="kpist-rank"></span>' +
+        '<span class="kpist-name"></span>' +
+        '<span class="kpist-track"><span class="kpist-fill"></span></span>' +
+        '<span class="kpist-move"></span>' +
+        '<span class="kpist-score"></span>' +
+        '<svg class="kpist-caret" viewBox="0 0 16 16" aria-hidden="true">' +
+          '<path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" ' +
+            'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>';
+      const rankEl = el.querySelector(".kpist-rank");
+      rankEl.textContent = rank;
+      if(rank <= 3) rankEl.className = "kpist-rank medal m" + rank;
+      el.querySelector(".kpist-name").textContent = r.name;
+      el.querySelector(".kpist-fill").style.width =
+        Math.max(0, Math.min(100, r.v)) + "%";
+      el.querySelector(".kpist-move").appendChild(kpiDeltaEl(r.d, m.dp));
+      el.querySelector(".kpist-score").textContent = shown;
+
+      /* Each row opens a panel under itself, pushing the rest of the board
+         down. One at a time, so the standings never turn into a wall. */
+      const panel = document.createElement("div");
+      /* The panel sits beside the row rather than inside it, so it needs the
+         band class of its own to pick up --sc and --scbg. */
+      panel.className = "kpidetail " + kpiBand(r.v);
+      panel.innerHTML = '<div class="kpid-clip"><div class="kpid-body">' +
+                        kpiPanel(r.a, spread) + '</div></div>';
+
+      el.setAttribute("role", "button");
+      el.setAttribute("tabindex", "0");
+      el.setAttribute("aria-expanded", "false");
+      el.addEventListener("click", function(){
+        const wasOpen = panel.classList.contains("open");
+        board.querySelectorAll(".kpidetail.open").forEach(function(x){ x.classList.remove("open"); });
+        board.querySelectorAll('.kpistand[aria-expanded="true"]').forEach(function(x){
+          x.setAttribute("aria-expanded", "false");
+        });
+        if(!wasOpen){
+          panel.classList.add("open");
+          el.setAttribute("aria-expanded", "true");
+        }
+      });
+      el.addEventListener("keydown", function(e){
+        if(e.key === "Enter" || e.key === " "){ e.preventDefault(); el.click(); }
+      });
+
+      board.appendChild(el);
+      board.appendChild(panel);
+    });
+  }
+
+  function buildKpi(){
+    const m = activeMetric();
+    /* Say which way the year to date figure was worked out, because an
+       average and a total answer different questions. */
+    const ytd = kpiMonth().ytd;
+    const extra = !ytd ? ""
+      : KPI_TOTALLED[m.id] ? "Added up across the months so far."
+      : m.id === "cph"     ? "Total calls divided by total hours across the months so far."
+      :                      "Averaged across the months each agent worked.";
+    const noteEl = $("#metricNote");
+    noteEl.textContent = [m.note, extra].filter(Boolean).join(" ");
+    noteEl.hidden = !noteEl.textContent;   /* no empty line where a note was */
+
+    const agents = kpiMonth().agents || [];
+    const prev = KPI_MONTHS[kpiIdx - 1];
+    const was = {};
+    if(prev) (prev.agents || []).forEach(function(a){ was[a.name] = m.value(a) || 0; });
+
+    const rows = agents.map(function(a){
+      const v = m.value(a) || 0;
+      return {
+        name: a.name,
+        v: v,
+        d: (prev && was[a.name] !== undefined) ? v - was[a.name] : null,
+        a: a
+      };
+    }).sort(function(x, y){ return y.v - x.v || x.name.localeCompare(y.name); });
+
+    const isScore = m.id === "score";
+    const top = rows.length ? rows[0].v : 0;
+    const bandOf = function(v){ return isScore ? kpiBand(v) : ""; };
+
+    const board = $("#kpiBoard");
+    board.innerHTML = "";
+
+    /* Total score gets the standings treatment. Every other measure keeps the
+       plain ranked rows, because only the score runs to a fixed 100 and so
+       only the score can be drawn honestly against a full-width track. */
+    if(isScore){
+      buildStandings(rows, m);
+    } else {
+      let place = 0, seen = null;
+      rows.forEach(function(r, i){
+        const shown = r.v.toFixed(m.dp);
+        if(seen === null || shown !== seen){ place = i + 1; seen = shown; }
+        const pct = top > 0 ? Math.round(r.v / top * 100) : 0;
+        const el = document.createElement("div");
+        el.className = "kpirow " + bandOf(r.v) + (place === 1 ? " lead" : "");
+        el.innerHTML =
+          '<span class="kpirank"></span>' +
+          '<span class="kpiname"></span>' +
+          '<span class="kpimove"></span>' +
+          '<span class="kpibar"><span style="width:' + pct + '%"></span></span>' +
+          '<span class="kpival"></span>';
+        const rank = el.querySelector(".kpirank");
+        rank.textContent = place;
+        if(place <= 3) rank.className = "kpirank medal m" + place;
+        el.querySelector(".kpiname").textContent = r.name;
+        el.querySelector(".kpimove").appendChild(kpiDeltaEl(r.d, m.dp));
+        el.querySelector(".kpival").innerHTML =
+          shown + (m.unit ? '<small>' + m.unit + '</small>' : "");
+        board.appendChild(el);
+      });
+    }
+
+    const moved = prev ? ", movement against " + prev.label.toLowerCase() : "";
+    $("#kpiFoot").textContent =
+      kpiMonth().label.toLowerCase() + " \u00b7 " + rows.length +
+      " agents \u00b7 ranked by " + m.label.toLowerCase() + moved;
+
+    const notice = $("#kpiNotice");
+    notice.hidden = kpiLive;
+    if(!kpiLive){
+      notice.innerHTML = "<strong>Could not read the KPI sheet, these are stand in numbers.</strong> " +
+        "It needs to be shared as <em>Anyone with the link, Viewer</em>. " +
+        "Run <code>arcKpiDiagnose()</code> in the browser console for the detail.";
+    }
+  }
+
   function setSection(id){
     const sec = SECTIONS.filter(function(x){ return x.id === id; })[0] || SECTIONS[0];
     activeSection = sec.id;
@@ -3433,6 +4476,7 @@ const FALLBACK = [
     $("#searchwrap").hidden  = view !== "faq";
     $("#shell").hidden       = view !== "faq";
     $("#linksPanel").hidden  = view !== "links";
+    $("#kpiPanel").hidden     = view !== "kpi";
     $("#showsPanel").hidden   = view !== "shows";
     $("#scriptsPanel").hidden  = view !== "scripts";
     $("#schedulePanel").hidden = view !== "schedule";
@@ -3443,6 +4487,15 @@ const FALLBACK = [
     if(view === "links")  buildLinks(sec.links);
     if(view === "guides") buildGuides(sec.links);
     if(view === "admin")   buildAdmin();
+    if(view === "kpi"){
+      buildMetricButtons();
+      if(!kpiReady){
+        kpiReady = true;
+        loadKpi().then(refreshKpi);
+      } else {
+        refreshKpi();
+      }
+    }
     if(view === "scripts")  buildScripts(sec.links);
     if(view === "schedule"){
       if(!scheduleLoaded){
